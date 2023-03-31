@@ -1,0 +1,71 @@
+paths:
+  /signup:
+    post:
+        tags:
+          - account
+        summary: user signup
+        security:
+          - BearerAuth: []
+        produces:
+          - application/json
+        parameters:
+          - in: body
+            name: body
+            required: true
+            schema:
+              "$ref": "#/definitions/signup"
+        responses:
+          '200':
+            description: OK
+  /login:
+    post:
+        tags:
+          - account
+        summary: user login
+        security:
+          - BearerAuth: []
+        produces:
+          - application/json
+        parameters:
+          - in: body
+            name: body
+            required: true
+            schema:
+              "$ref": "#/definitions/login"
+        responses:
+          '200':
+            description: OK
+definitions:
+  signup:
+    type: object
+    properties:
+      firstName:
+        type: string
+        required: true
+      lastName:
+        type: string
+        required: true
+      phoneNumber:
+        type: string
+        required: true
+      email:
+        type: string
+        required: true
+      password:
+        type: string
+        required: true
+      confirmpassword:
+        type: string
+        required: true
+      userRole:
+        type: string
+        required: true
+  login:
+    type: object
+    properties:
+      email: 
+        type: string
+        required: true
+      password: 
+        type: string
+        required: true

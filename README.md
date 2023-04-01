@@ -1,3 +1,3 @@
-# Dummy Node
+# Email Project
 
-Dummy Node Repo
+Email Project

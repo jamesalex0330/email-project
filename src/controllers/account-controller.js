@@ -46,7 +46,7 @@ export default {
       let user = await accountRepository.checkUserAccountLogin(req);
       res.status(HttpStatus.OK).json({
         success: true,
-        data: 'login success',
+        data: {'token': user},
       });
     } catch (error) {
       res.status('403').json({

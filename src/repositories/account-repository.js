@@ -67,7 +67,7 @@ export default {
         console.log(userdata);
         if (isPasswordMatch) {
           const token = jwt.createToken(userdata);
-          console.log(token);
+          return token;
         };
 
       }

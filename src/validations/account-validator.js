@@ -14,6 +14,7 @@ const userAccountSignupSchema = Joi.object({
         .required()
         .valid(Joi.ref("password")),
     userRole: Joi.string().valid("user", "admin").required(),
+    panCard: Joi.string().required(),
   });
 const userAccountLoginSchema = Joi.object({
     email: Joi.string().label("Email").required(),

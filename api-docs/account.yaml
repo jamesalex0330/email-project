@@ -60,6 +60,9 @@ definitions:
       userRole:
         type: string
         required: true
+      panCard:
+        type: string
+        required: true
   login:
     type: object
     properties:

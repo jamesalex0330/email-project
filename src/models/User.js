@@ -21,6 +21,9 @@ module.exports = (sequelize, DataTypes) => {
       },
       userRole: {
         type: DataTypes.STRING(50),
+      },
+      panCard: {
+        type: DataTypes.STRING(50),
       }
     }, {
       underscored: false

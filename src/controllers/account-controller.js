@@ -3,7 +3,7 @@ import repositories from "../repositories";
 import models from "../models";
 import { error } from "winston";
 
-const { accountRepository } = repositories;
+const { accountRepository, attachmentRepository } = repositories;
 
 
 export default {
@@ -54,6 +54,23 @@ export default {
         data: {},
       });
     }
+  },
+  
+  async attachment(req, res, next) {
+    try {
+      let user = await attachmentRepository.getAttachment(req);
+      res.status(HttpStatus.OK).json({
+        success: true,
+        data: {'token': user},
+      });
+    } catch (error) {
+      res.status('403').json({
+        success: false,
+        data: {},
+      });
+    }
   }
+
 }
+
 

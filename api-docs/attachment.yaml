@@ -1,0 +1,12 @@
+paths:
+  attachment:
+    get:
+      tags:
+        - attachment
+      security:
+        - BearerAuth: []
+      produces:
+        - application/json      
+      responses:
+        '200':
+          description: OK      

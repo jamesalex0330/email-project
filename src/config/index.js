@@ -67,6 +67,7 @@ export default {
     api_key: process.env.GOOGLE_API_KEY,
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    redirectUrl: process.env.GOOGLE_REDIRECT_URL
   },
   notification: {
     ios: {

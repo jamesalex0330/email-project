@@ -1,50 +1,63 @@
-import fs from "fs";
-import path from "path";
-import multer from "multer";
-import config from "../config";
 import models from "../models";
-import HttpStatus from "http-status";
+const { MediaTemp } = models;
+import multer from "multer";
 
+import path from 'path';
 
-const { BlogImages } = models;
-const { Op, literal } = models.Sequelize;
-
-
-// using below function for local file system diskStorage
+/**
+ * MULTER SETUP FOR IMAG3E UPLOAD
+ */
 const storages = multer.diskStorage({
   destination: function (req, file, cb) {
-    var uplds = path.join(__dirname, `../../public/uploads`)
-    file.path= uplds
-    cb(null, uplds)
+    cb(null, `public`)
+
   },
   filename: (req, file, cb) => {
-    console.log(file);
-    const datetimestamp = Date.now();
-    const filename = file.originalname.replace(/[^A-Z0-9.]/gi, "-");
-    const fileArray = filename.split(".");
+    const dateTimeStamp = Date.now();
+    const fileName = file.originalname.replace(/[^A-Z0-9.]/gi, "-");
+    const fileArray = fileName.split(".");
     const ext = fileArray.pop();
-    cb(null, `${fileArray.join("-")}-${datetimestamp}.${ext}`);
+    const data = `${fileArray.join("-")}-${dateTimeStamp}.${ext}`
+    cb(null, data);
   }
 });
+
 export default {
-  // we will decide here storage type
-  async uploadFile(req, res, next) {
-    console.log(req.file);
-        
+  async create({
+    params, file, headers, req,
+  }) {
     try {
-      const upload= multer({
-        storage: storages
-      })
-      upload.array("file",5)(req,res,async(error)=>{
-        console.log(error);
-      })
-      
-      console.log(req.file);
-    var savemedia = await BlogImages.create({
-        Name: req.body.name});
-        return savemedia
+      let result = '';
+      const mediaType = params.mediaType;
+
+      const imageDir = path.join(__dirname, `../../${file.path}`);
+      // const ext = path.extname(file.originalname).split('.').pop();
+      const HTTPs = 'https';
+      // if (config.app.mediaStorage === 's3' && params.mediaType === 'image') {
+      //   const originalFileObj = file.transforms.findIndex((data) => data.id === 'original');
+      //   if (originalFileObj >= 0) {
+      //     // eslint-disable-next-line no-param-reassign
+      //     file.key = file.transforms[originalFileObj].key;
+      //   }
+      // }
+
+      const mediaData = {
+        name: file.filename || file.originalname,
+        basePath: file.path || file.key,
+        imagePath: imageDir,
+        baseUrl: `${HTTPs}://${headers.host}/${file.path}`,
+        mediaType,
+        mediaFor: params.mediaFor,
+        isThumbImage: false,
+        status: 'pending',
+      };
+      return mediaData;
+      // Upload image on s3
+
+      return result;
     } catch (error) {
-      console.log(error);
+      // loggers.error(`Media file create error: ${error}, user id: ${req?.user?.id} `);
+      throw Error(error);
     }
-  }
+  },
 }

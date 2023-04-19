@@ -1,12 +1,25 @@
 paths:
-  attachment:
-    get:
+  /upload-csv:
+    post:
       tags:
         - attachment
       security:
         - BearerAuth: []
       produces:
-        - application/json      
+        - application/json   
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            "$ref": "#/definitions/uploadCsv"   
       responses:
         '200':
-          description: OK      
+          description: OK   
+definitions:
+  uploadCsv:
+    type: object
+    properties:
+      path:
+        type: string
+        required: true

@@ -14,9 +14,9 @@ export default {
    * @param {Function} next
    */
   async signup(req, res, next) {
-    
+
     try {
-      
+
       let result = await accountRepository.signup(req);
       if (result) {
         res.status(HttpStatus.OK).json({
@@ -46,7 +46,7 @@ export default {
       let user = await accountRepository.checkUserAccountLogin(req);
       res.status(HttpStatus.OK).json({
         success: true,
-        data: {'token': user},
+        data: { 'token': user },
       });
     } catch (error) {
       res.status('403').json({
@@ -55,13 +55,14 @@ export default {
       });
     }
   },
-  
-  async attachment(req, res, next) {
+
+  async getAuthorizationCode(req, res, next) {
     try {
-      let user = await attachmentRepository.getAttachment(req);
+      console.log(232323);
+      let user = await attachmentRepository.getAuthorizationCode(req);
       res.status(HttpStatus.OK).json({
         success: true,
-        data: {'token': user},
+        data: user,
       });
     } catch (error) {
       res.status('403').json({
@@ -69,7 +70,9 @@ export default {
         data: {},
       });
     }
-  }
+  },
+
+
 
 }
 

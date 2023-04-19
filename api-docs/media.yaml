@@ -1,0 +1,48 @@
+/media/upload/{mediaFor}/{mediaType}:
+  post:
+    tags:
+      - Media
+    summary: Media upload
+    consumes:
+      - multipart/form-data
+    produces:
+      - application/json
+    parameters:
+      - in: path
+        name: mediaFor
+        type: string
+        enum:
+          - 'csv'
+        required: true
+      - in: path
+        name: mediaType
+        type: string
+        enum:
+          - 'upload'
+        required: true
+      - in: formData
+        name: file
+        type: file
+        required: true
+
+    responses:
+      '200':
+        description: OK
+
+# /media/signed-url:
+#   get:
+#     tags:
+#       - Media
+#     summary: Get document Signed URL
+#     security:
+#       - BearerAuth: []
+#     produces:
+#       - application/json
+#     parameters:
+#       - in: query
+#         name: filePath
+#         type: string
+#         required: true
+#     responses:
+#       '200':
+#         description: OK

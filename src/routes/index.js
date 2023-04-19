@@ -5,7 +5,7 @@ import loggers from '../services/logger';
 
 import account from './account';
 import media from './media'
-
+import attachment from './attachment'
 const router = Router();
 const register = (app) => {
   app.use(router);
@@ -16,9 +16,10 @@ const register = (app) => {
     }
   });
 
-  router.use('/api',[
+  router.use('/api', [
     account,
-    media
+    media,
+    attachment
   ]);
 
 

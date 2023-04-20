@@ -33,7 +33,7 @@ export default {
     secret_key: process.env.PAYMENT_SECRET_KEY
   },
   database: {
-    mysql: {
+    postgres: {
       host: process.env.DB_HOST,
       port: process.env.DB_PORT,
       user: process.env.DB_USERNAME,

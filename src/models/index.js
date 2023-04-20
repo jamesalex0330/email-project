@@ -2,8 +2,9 @@ import fs from 'fs';
 import Sequelize from 'sequelize';
 import path from 'path';
 import config from '../config';
-const dbConfig = config.database.mysql;
+const dbConfig = config.database.postgres;
 
+console.log(config.database.postgres);
 const db = {};
 let sequelize;
 sequelize = new Sequelize(dbConfig.db, dbConfig.user, dbConfig.password, {
@@ -11,7 +12,7 @@ sequelize = new Sequelize(dbConfig.db, dbConfig.user, dbConfig.password, {
   port: dbConfig.port,
   timezone: dbConfig.timezone,
   logging: false,
-  dialect: 'mysql',
+  dialect: 'postgres',
 });
 
 

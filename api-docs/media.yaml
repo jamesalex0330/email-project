@@ -12,7 +12,8 @@
         name: mediaFor
         type: string
         enum:
-          - 'csv'
+          - 'transaction'
+          - 'can'
         required: true
       - in: path
         name: mediaType

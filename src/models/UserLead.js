@@ -4,6 +4,10 @@ module.exports = (sequelize, DataTypes) => {
   const UserLead = sequelize.define(
     "UserLead",
     {
+      userId: {
+        type: DataTypes.INTEGER,
+        defaultValue: null
+      },
       orderNumber: {
         type: DataTypes.STRING(100),
       },

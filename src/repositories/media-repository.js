@@ -1,5 +1,5 @@
 import models from "../models";
-const { MediaTemp, UserLead, UserCan } = models;
+const { MediaTemp, UserLead, UserCan,User } = models;
 import multer from "multer";
 import xlsx from 'xlsx';
 import path from 'path';
@@ -68,8 +68,23 @@ export default {
             let orderTimeDate = new Date(index['Order Timestamp']);
             orderTime = orderTimeDate.toDateString();
           }
+          let userId = null;
+          let userCanData = await UserCan.findOne({
+            where: { CAN: index['CAN Number'] }
+          });
 
+          if(userCanData){
+            let userData = await User.findOne({
+              where: { panCard: userCanData.firstHolderPan }
+            });
+
+            if(userData){
+              userId = userData.id;
+            }
+          }
+          
           let bodyData = {
+            userId: userId,
             orderNumber: index['Order Number'],
             orderSequenceNumber: index['Order Sequence Number'],
             transactionTypeCode: index['Transaction Type Code'],

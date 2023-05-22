@@ -69,6 +69,7 @@ export default {
           const token = jwt.createToken(userdata);
           return token;
         };
+        return false;
 
       }
     } catch (error) {

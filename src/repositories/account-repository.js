@@ -60,11 +60,7 @@ export default {
             data: 'incorrect PASSWORD'
           })
         }
-        console.log(password);
-        console.log(user.password);
-        console.log(isPasswordMatch);
         var userdata = { id: user.id, email: user.email, userRole: user.userRole }
-        console.log(userdata);
         if (isPasswordMatch) {
           const token = jwt.createToken(userdata);
           return token;

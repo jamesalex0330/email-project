@@ -44,20 +44,22 @@ export default {
   async userAccountLogin(req, res, next) {
     try {
       let user = await accountRepository.checkUserAccountLogin(req);
-      if(user) {
+      if (user) {
         res.status(HttpStatus.OK).json({
           success: true,
           data: { 'token': user },
         });
-        
+
+      } else {
+        res.status('403').json({
+          success: false,
+          data: null,
+          messsage: "Invalid email or password"
+
+        });
       }
-      res.status('403').json({
-        success: false,
-        data: null,
-        messsage: "Invalid email or password"
-        
-      });
-      
+
+
     } catch (error) {
       res.status('403').json({
         success: false,

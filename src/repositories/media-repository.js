@@ -1,5 +1,5 @@
 import models from "../models";
-const { MediaTemp, UserLead, UserCan,User } = models;
+const { MediaTemp, UserLead, UserCan,User, MasterInc ,ThresoldInc, CdsHold} = models;
 import multer from "multer";
 import xlsx from 'xlsx';
 import path from 'path';
@@ -142,6 +142,140 @@ export default {
           await UserCan.create(bodyData);
         });
         await Promise.all(insertResult);
+      }  else if (params.mediaFor == "master") {
+        
+        const insertResult = data.map(async (index) => {
+          var allotDate = '';
+          var reopenDate = '';
+          var maturityDate= '';
+          var nfoStart = '';
+          var nfoEnd = '';
+          if (index['allot_date']) {
+            allotDate = new Date(index['allot_date']);
+            allotDate = allotDate.toDateString();
+          }
+          
+          if (index['reopen_date']) {
+            reopenDate = new Date(index['reopen_date']);
+            reopenDate = reopenDate.toDateString();
+          }
+
+          if (index['maturityDate']) {
+            maturityDate = new Date(index['maturityDate']);
+            maturityDate = reopenDate.toDateString();
+          }
+
+          if (index['nfo_start']) {
+            nfoStart = new Date(index['nfo_start']);
+            nfoStart = nfoStart.toDateString();
+          }
+
+          if (index['nfo_end']) {
+            nfoEnd = new Date(index['nfo_end']);
+            nfoEnd = nfoEnd.toDateString();
+          }
+          console.log(nfoStart)
+
+          let bodyData = {
+            schemeCode: index['scheme_code'],
+            fundCode: index['fund_code'],
+            planName: index['plan_name'],
+            schemeType:  index['scheme_type'],
+            planType: index['plan_type'],
+            planOpt: index['plan_opt'],
+            divOpt: index['div_opt'],
+            amfiId: index['amfi_id'],
+            priIsin: index['pri_isin'],
+            secIsin: index['sec_isin'],
+            nfoStart: nfoStart,
+            nfoEnd: nfoEnd,
+            allotDate: allotDate,
+            reopenDate: reopenDate,
+            maturityDate: maturityDate,
+            entryLoad: index['entry_load'],
+            exitLoad: index['exit_load'],
+            purAllowed: index['pur_allowed'],
+            nfoAllowed: index['nfo_allowed'],
+            redeemAllowed: index['redeem_allowed'],
+            sipAllowed: index['sip_allowed'],
+            switchOutAllowed: index['switch_out_allowed'],
+            switchInAllowed: index['Switch_In_Allowed'],
+            stpOutAllowed: index['stp_out_allowed'],
+            stpInAllowed: index['stp_in_allowed'],
+            swpAllowed: index['swp_allowed'],
+            dematAllowed: index['Demat_Allowed'],
+            catgID: index['Catg ID'],
+            subCatgID: index['Sub-Catg ID'],
+            schemeFlag: index['Scheme Flag']          
+
+          }
+          await MasterInc.create(bodyData);
+        });
+
+      } else if (params.mediaFor == "thersold") {
+        const insertResult = data.map(async (index) => {
+          var startDate = '';
+          var endDate = '';
+
+          if (index['start_date']) {
+            startDate = new Date(index['start_date']);
+            startDate = startDate.toDateString();
+          }
+
+          if (index['end_date']) {
+            endDate = new Date(index['end_date']);
+            endDate = endDate.toDateString();
+          }
+          
+          
+          let bodyData = {
+            schemeCode: index['scheme_code'],
+            fundCode: index['fund_code'],
+            txnType: index['txn_type'],
+            sysFreq:  index['sys_freq'],
+            sysFreqOpt: index['sys_freq_opt'],
+            sysDates: index['sys_dates'],
+            minAmt: index['min_amt'],
+            maxAmt: index['max_amt'],
+            multipleAmt: index['multiple_amt'],
+            minUnits: index['min_units'],
+            multipleUnits: index['multiple_units'],
+            minInst: index['min_inst'],            
+            maxInst: index['max_inst'],
+            sysPerpetual: index['sys_perpetual'],
+            minCumAmt: index['min_cum_amt'],
+            startDate: startDate,
+            endDate: endDate,                   
+
+          }
+          await ThresoldInc.create(bodyData);
+        });
+      } else if(params.mediaFor == "cds-hold") {
+        const insertResult = data.map(async (index) => {
+          var navDate = '';
+        
+          if (index['NAV Date']) {
+            navDate = new Date(index['NAV Date']);
+            navDate = navDate.toDateString();
+          }
+          
+          
+          let bodyData = {            
+            can: index['CAN'],
+            canName: index['CAN Name'],
+            fundCode:  index['Fund Code'],
+            fundName: index['Fund Name'],
+            schemeCode: index['Scheme Code'],
+            schemeName: index['Scheme Name'],
+            folioNumber: index['Folio Number'],
+            folioCheckDigit: index['Folio Check Digit'],
+            unitHolding: index['Unit Holding'],
+            currentValue: index['Current Value'],
+            nav: index['NAV'],           
+            navDate: navDate
+          }
+          await CdsHold.create(bodyData);
+        });
       }
 
       return true;

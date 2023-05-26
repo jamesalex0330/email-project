@@ -99,5 +99,12 @@ module.exports = (sequelize, DataTypes) => {
       underscored: false
     }
   );
+  UserLead.associate = function (models) {
+    UserLead.belongsTo(models.User, {
+      foreignKey: "userId",
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    });   
+  };
   return UserLead;
 };

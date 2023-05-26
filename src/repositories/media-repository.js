@@ -174,8 +174,7 @@ export default {
             nfoEnd = new Date(index['nfo_end']);
             nfoEnd = nfoEnd.toDateString();
           }
-          console.log(nfoStart)
-
+          
           let bodyData = {
             schemeCode: index['scheme_code'],
             fundCode: index['fund_code'],
@@ -228,7 +227,16 @@ export default {
           }
           
           
+          let thersold = await ThresoldInc.findOne({
+            where: { schemeCode: index['scheme_code'], fundCode: index['fund_code']}
+          });
+          var masterIncId = null;
+          if(thersold) {
+            masterIncId = thersold.id;
+          }
+
           let bodyData = {
+            masterIncId:masterIncId,
             schemeCode: index['scheme_code'],
             fundCode: index['fund_code'],
             txnType: index['txn_type'],

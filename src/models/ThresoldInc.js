@@ -4,6 +4,10 @@ module.exports = (sequelize, DataTypes) => {
   const ThresoldInc = sequelize.define(
     "ThresoldInc",
     {
+      masterIncId: {
+        type: DataTypes.INTEGER,
+        defaultValue: null
+      },
       fundCode: {
         type: DataTypes.STRING(255),
       },
@@ -60,5 +64,12 @@ module.exports = (sequelize, DataTypes) => {
       underscored: false
     }
   );
+  ThresoldInc.associate = function (models) {
+    ThresoldInc.belongsTo(models.MasterInc, {
+      foreignKey: "masterIncId",
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    });   
+  };
   return ThresoldInc;
 };

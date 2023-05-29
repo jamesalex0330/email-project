@@ -96,7 +96,12 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(100),
       }
     }, {
-      underscored: false
+      underscored: false,
+      indexes: [
+        {
+          fields: ['canNumber']
+        }
+      ]
     }
   );
   UserLead.associate = function (models) {

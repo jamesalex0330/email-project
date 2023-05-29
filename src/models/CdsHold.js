@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       unitHolding: {
         type: DataTypes.STRING(255),
-      },      
+      },
       currentValue: {
         type: DataTypes.STRING(255),
       },
@@ -39,11 +39,16 @@ module.exports = (sequelize, DataTypes) => {
       },
       navDate: {
         type: DataTypes.STRING(255),
-      }       
-     
+      }
+
     }, {
-      underscored: false
-    }
+    underscored: false,
+    indexes: [
+      {
+        fields: ['nav','currentValue','unitHolding','folioNumber','can']
+      }
+    ]
+  }
   );
   return CdsHold;
 };

@@ -26,7 +26,12 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(50),
       }
     }, {
-      underscored: false
+      underscored: false,
+      indexes: [
+        {
+          fields: ['panCard']
+        }
+      ]
     }
   );
   return User;

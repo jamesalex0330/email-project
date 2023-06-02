@@ -18,7 +18,8 @@ const userAccountSignupSchema = Joi.object({
   });
 const userAccountLoginSchema = Joi.object({
     email: Joi.string().label("Email").required(),
-    password: Joi.string().required()
+    password: Joi.string().required(),
+    deviceType: Joi.string().required()
   });
 
 export default {

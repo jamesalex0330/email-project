@@ -1,0 +1,13 @@
+paths:
+  /dashboard:
+    get:
+        tags:
+          - user
+        summary: user dashboard
+        security:
+          - BearerAuth: []
+        produces:
+          - application/json
+        responses:
+          '200':
+            description: OK

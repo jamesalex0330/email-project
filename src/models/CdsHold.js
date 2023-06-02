@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(255),
       },
       currentValue: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.DECIMAL(20, 15),
       },
       nav: {
         type: DataTypes.STRING(255),

@@ -53,7 +53,7 @@ export default {
       } else {
         res.status('403').json({
           success: false,
-          data: null,
+          data: {},
           messsage: "Invalid email or password"
 
         });

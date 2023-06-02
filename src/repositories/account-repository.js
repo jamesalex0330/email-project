@@ -5,7 +5,7 @@ import config from "../config";
 import jwt from "../services/jwt";
 import httpStatus from "http-status";
 const { Sequelize } = models.sequelize;
-const { User } = models
+const { User, UserToken, UserDevice } = models
 export default {
   async createHashPassword(password) {
     try {
@@ -22,7 +22,7 @@ export default {
       let hashPassword = await this.createHashPassword(bodyData.password);
       bodyData.password = hashPassword;
       let userData = await User.create(bodyData);
-      console.log(req.body);
+
 
       if (userData) {
         return userData;
@@ -50,7 +50,7 @@ export default {
   async checkUserAccountLogin(req, res, next) {
 
     try {
-      let { email, password } = req.body;
+      let { email, password, deviceType } = req.body;
       const user = await User.findOne({ where: { email: req.body.email } });
       if (user) {
         const isPasswordMatch = await this.compareUserPassword(password, user.password);
@@ -60,9 +60,17 @@ export default {
             data: 'incorrect PASSWORD'
           })
         }
-        var userdata = { id: user.id, email: user.email, userRole: user.userRole }
+        // var userdata = { id: user.id, email: user.email, userRole: user.userRole }
         if (isPasswordMatch) {
-          const token = jwt.createToken(userdata);
+          const { password, ...userData } = user.get();
+          const token = jwt.createToken(userData);
+          let userAccessToken = await token.then(e=>e);
+          const deviceData = {
+            userId: userData.id,
+            deviceType,
+            accessToken: userAccessToken
+          };
+          await this.addUpdateUserDevice(deviceData);
           return token;
         };
         return false;
@@ -73,23 +81,108 @@ export default {
 
     }
   },
+  /**
+ * Find user detail
+ * @param {Object} whereObj
+ */
+  async findOne(whereObj) {
+    try {
+      return await User.findOne({
+        where: whereObj,
+        attributes: {
+          exclude: ["password", "verifyToken"],
+        },
+      });
+    } catch (error) {
+      throw Error(error);
+    }
+  },
+
+  /**
+ * Add or update user device
+ * @param {Object} data
+ */
+  async addUpdateUserDevice(data) {
+    try {
+      const userDeviceToken = await this.getUserDeviceToken(data.userId);
+      const { userId, deviceType, accessToken } =
+        data;
+      
+      if (userDeviceToken) {
+        const newData = {
+          accessToken,
+          deviceType,
+        };
+        await this.updateUserDevice(userDeviceToken, newData);
+      } else {
+        const updateData = {
+          userId,
+          deviceType,
+          accessToken
+        };
+        await this.addUserDevice(updateData);
+      }
+
+    } catch (error) {
+      throw Error(error);
+    }
+  },
+
+  /**
+ * Get user device token from user id
+ * @param {Number} userId
+ */
+  async getUserDeviceToken(userId) {
+    try {
+      let userToken = await UserToken.findOne({
+        where: { userId },
+      });
+      return userToken;
+    } catch (error) {
+      throw Error(error);
+    }
+  },
+
+  /**
+* Update user device
+* @param {Object} userDeviceObject
+* @param {Object} data
+*/
+  async updateUserDevice(userDeviceObject, data) {
+    try {
+      const response = await userDeviceObject.update(data);
+      return response;
+    } catch (error) {
+      throw Error(error);
+    }
+  },
+
     /**
-   * Find user detail
-   * @param {Object} whereObj
+   * Add user device
+   * @param {Object} data
    */
-     async findOne(whereObj) {
+    async addUserDevice(data) {
       try {
-        if (!whereObj.status) {
-          whereObj.status = { [Op.ne]: "deleted" };
-        }
-        return await User.findOne({
-          where: whereObj,
-          attributes: {
-            exclude: ["password", "verifyToken"],
-          },
-        });
+        return await UserToken.create(data);
       } catch (error) {
         throw Error(error);
       }
+    },
+
+    /**
+   * Get device etail by token
+   * @param {String} token
+   */
+  async getDeviceDetailByToken(token) {
+    try {
+      const where = {
+        access_token: token,
+      };
+      return await UserToken.findOne({
+        where,
+      });
+    } catch (error) {
+      throw Error(error);
     }
+  },
 }

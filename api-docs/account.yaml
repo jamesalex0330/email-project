@@ -72,3 +72,8 @@ definitions:
       password: 
         type: string
         required: true
+      deviceType:
+        type: string
+        enum: 
+          - 'android'
+          - 'ios'  

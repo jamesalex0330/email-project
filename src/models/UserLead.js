@@ -54,7 +54,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(100),
       },
       amount: {
-        type: DataTypes.STRING(100),
+        type: DataTypes.DECIMAL(20, 15),
       },
       units: {
         type: DataTypes.STRING(100),

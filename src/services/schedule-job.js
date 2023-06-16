@@ -2,7 +2,7 @@ import loggers from './logger';
 import repositories from '../repositories';
 
 const { errorLogger } = loggers;
-const { mediaRepository,bookingRepository } = repositories;
+const { mediaRepository,gmailRepository } = repositories;
 
 export default {
     /**
@@ -22,6 +22,17 @@ export default {
     async deleteMedia() {
         try {
             // await mediaRepository.findAllAndRemove();
+        } catch (error) {
+            errorLogger.error(JSON.stringify(error));
+        }
+    },
+
+    /**
+     * delete media schedule
+     */
+    async getUnreadEmails() {
+        try {
+            await gmailRepository.getUnreadEmails();
         } catch (error) {
             errorLogger.error(JSON.stringify(error));
         }

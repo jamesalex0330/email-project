@@ -7,6 +7,7 @@ import account from './account';
 import media from './media'
 import attachment from './attachment'
 import user from './user'
+import gmail from './gmail'
 const router = Router();
 const register = (app) => {
   app.use(router);
@@ -21,7 +22,8 @@ const register = (app) => {
     account,
     media,
     attachment,
-    user
+    user,
+    gmail
   ]);
 
 

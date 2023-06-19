@@ -21,7 +21,7 @@ export default {
                     let arrayData = headerArray.find(item => item.name.toLowerCase() === "subject");
                     let subject = arrayData['value'].toLowerCase();
                     var getSubject = this.getSubject(subject);
-                    if (getSubject) {
+                    if (getSubject && messageDetails.payload.parts) {
                         for await (const mailPart of messageDetails.payload.parts) {
                             if (mailPart.body.attachmentId) {
                                 let attachmentId = mailPart.body.attachmentId;

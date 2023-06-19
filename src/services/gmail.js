@@ -1,7 +1,6 @@
 const axios = require("axios");
 const { generateConfig, postGenerateConfig } = require("../utils/utils");
 const nodemailer = require("nodemailer");
-const CONSTANTS = require("../utils/constants");
 const { google } = require("googleapis");
 
 require("dotenv").config();
@@ -20,7 +19,6 @@ async function messageList(email) {
         const { token } = await oAuth2Client.getAccessToken();
         const config = generateConfig(url, token);
         const response = await axios(config);
-
         return await response.data;
     } catch (error) {
         throw error;

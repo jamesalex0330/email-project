@@ -3,6 +3,7 @@ import xlsx from 'xlsx';
 import models from "../models";
 import gmailService from "../services/gmail";
 import path from "path";
+const unZipper = require("unzipper");
 const fs = require('fs');
 const { Sequelize } = models.sequelize;
 const { UserLead, UserCan, User, MasterInc, ThresoldInc, CdsHold } = models;
@@ -12,11 +13,6 @@ export default {
         let messageList = await gmailService.messageList(email);
         if (messageList.messages) {
             let messages = messageList.messages;
-
-            let transactionSubject = "Transaction Response Feed".toLowerCase();
-            let canSubject = "CAN Registration Feed".toLowerCase();
-            let CSDSubject = "Daily CDS Feed".toLowerCase();
-            let masterSubject = "MF Utility-Incremental Scheme".toLowerCase();
             for await (const message of messages) {
                 let messageId = message.id;
                 let messageDetails = await gmailService.readMail(email, messageId);
@@ -24,38 +20,70 @@ export default {
                     let headerArray = messageDetails.payload.headers;
                     let arrayData = headerArray.find(item => item.name.toLowerCase() === "subject");
                     let subject = arrayData['value'].toLowerCase();
-                    if (subject.search(transactionSubject) >= 0 || subject.search(canSubject) >= 0 || subject.search(CSDSubject) >= 0 || subject.search(masterSubject) >= 0) {
-                        console.log(subject);
-                        if (messageDetails.payload.parts[1] && messageDetails.payload.parts[1].body.attachmentId) {
-                            let attachmentId = messageDetails.payload.parts[1].body.attachmentId;
-                            let result = await gmailService.getAttachment(email, messageId, attachmentId);
-                            const data = result.data;
-                            var outputPath = path.join(__dirname, `../../public/uploads/subject-${Date.now()}.xlsx`);
-                            const fileData = Buffer.from(data, 'base64');
-                            fs.writeFileSync(outputPath, Buffer.from(fileData));
-                            await this.importMails(outputPath, subject);
-                        }
-                        // await gmailService.markAsRead(email, messageId)
-                    }
+                    var getSubject = this.getSubject(subject);
+                    if (getSubject) {
+                        for await (const mailPart of messageDetails.payload.parts) {
+                            if (mailPart.body.attachmentId) {
+                                let attachmentId = mailPart.body.attachmentId;
+                                let result = await gmailService.getAttachment(email, messageId, attachmentId);
+                                var attachmentData = result.data;
+                                if (attachmentData) {
+                                    let getFileName = (mailPart.filename).split('.');
+                                    let getFileExt = getFileName.slice(-1);
+                                    if (getFileExt == "zip") {
+                                        var outputPathZip = path.join(__dirname, `../../Public/uploads/${Date.now()}-${getSubject}.zip`);
+                                        const zipFileData = Buffer.from(attachmentData, 'base64');
 
+
+                                        fs.writeFileSync(outputPathZip, Buffer.from(zipFileData));
+                                        const directory = await unZipper.Open.file(outputPathZip);
+                                        const extract = await directory.files[0].buffer('40071D');          // 40071D is password for zip file.
+                                        const fileData = Buffer.from(extract, 'base64');
+
+
+                                        var outputPath = path.join(__dirname, `../../Public/uploads/${Date.now()}-${getSubject}.dat`);
+                                        fs.writeFileSync(outputPath, Buffer.from(fileData));
+
+
+                                        // for delete zip
+                                        fs.unlink(outputPathZip, (error) => {
+                                            if (error) {
+                                                console.error(`Error deleting file ${outputPathZip}:`, error);
+                                            }
+                                        });
+                                    } else {
+                                        var outputPath = path.join(__dirname, `../../public/uploads/${Date.now()}-${getSubject}.dat`);
+                                        const fileData = Buffer.from(attachmentData, 'base64');
+                                        fs.writeFileSync(outputPath, Buffer.from(fileData));
+                                    }
+                                    await this.importMails(outputPath, getSubject);
+                                }
+                            }
+                        }
+                    }
+                    
                 }
+                await gmailService.markAsRead(email, messageId)
             }
             return messageList;
         }
     },
+
     async importMails(File, subject) {
         try {
-
             let transactionSubject = "Transaction Response Feed".toLowerCase();
             let canSubject = "CAN Registration Feed".toLowerCase();
-            let CSDSubject = "Daily CDS Feed".toLowerCase();
+            let CDSSubject = "Daily CDS Feed".toLowerCase();
             let masterSubject = "MF Utility-Incremental Scheme".toLowerCase();
+            let thersoldSubject = "thersold".toLowerCase();
             const workbook = xlsx.readFile(File, { cellDates: true });
             const sheetNames = workbook.SheetNames;
             const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetNames[0]]);
-            for await (const row of data) {
-                if (subject.search(transactionSubject) > 0) {
-                    const insertResult = data.map(async (index) => {
+            if (data) {
+                let i = 1;
+                for await (const row of data) {
+                    var bodyData = {};
+                    if (subject === transactionSubject) {
                         var formd = '';
                         if (row['Value Date']) {
                             let currentDate = new Date(row['Value Date']);
@@ -67,21 +95,20 @@ export default {
                             orderTime = orderTimeDate.toDateString();
                         }
                         let userId = null;
-                        let userCanData = await UserCan.findOne({
-                            where: { CAN: row['CAN Number'] }
-                        });
-
-                        if (userCanData) {
-                            let userData = await User.findOne({
-                                where: { panCard: userCanData.firstHolderPan }
+                        if (row['CAN Number']) {
+                            let userCanData = await UserCan.findOne({
+                                where: { CAN: row['CAN Number'] }
                             });
-
-                            if (userData) {
-                                userId = userData.id;
+                            if (userCanData) {
+                                let userData = await User.findOne({
+                                    where: { panCard: userCanData.firstHolderPan }
+                                });
+                                if (userData) {
+                                    userId = userData.id;
+                                }
                             }
                         }
-
-                        let bodyData = {
+                        bodyData = {
                             userId: userId,
                             orderNumber: row['Order Number'],
                             orderSequenceNumber: row['Order Sequence Number'],
@@ -113,19 +140,14 @@ export default {
                             valueDate: formd,
                             addColumn: row['Addl. Column 1']
                         }
-                        console.log(bodyData);
                         await UserLead.create(bodyData);
-                    });
-                    await Promise.all(insertResult);
-                } else if (subject.search(canSubject)) {
-                    const insertResult = data.map(async (index) => {
+                    } else if (subject === canSubject) {
                         var formd = '';
                         if (row['CAN Reg Date']) {
                             let currentDate = new Date(row['CAN Reg Date']);
                             formd = currentDate.toDateString();
                         }
-
-                        let bodyData = {
+                        bodyData = {
                             arnCode: row['ARN/RIA Code'],
                             EUIN: row['EUIN'],
                             CAN: row['CAN'],
@@ -139,11 +161,7 @@ export default {
                             docProof: row['DOC PROOF']
                         }
                         await UserCan.create(bodyData);
-                    });
-                    await Promise.all(insertResult);
-                } else if (subject.search(masterSubject)) {
-
-                    const insertResult = data.map(async (index) => {
+                    } else if (subject === masterSubject) {
                         var allotDate = '';
                         var reopenDate = '';
                         var maturityDate = '';
@@ -153,28 +171,23 @@ export default {
                             allotDate = new Date(row['allot_date']);
                             allotDate = allotDate.toDateString();
                         }
-
                         if (row['reopen_date']) {
                             reopenDate = new Date(row['reopen_date']);
                             reopenDate = reopenDate.toDateString();
                         }
-
                         if (row['maturityDate']) {
                             maturityDate = new Date(row['maturityDate']);
                             maturityDate = reopenDate.toDateString();
                         }
-
                         if (row['nfo_start']) {
                             nfoStart = new Date(row['nfo_start']);
                             nfoStart = nfoStart.toDateString();
                         }
-
                         if (row['nfo_end']) {
                             nfoEnd = new Date(row['nfo_end']);
                             nfoEnd = nfoEnd.toDateString();
                         }
-
-                        let bodyData = {
+                        bodyData = {
                             schemeCode: row['scheme_code'],
                             fundCode: row['fund_code'],
                             planName: row['plan_name'],
@@ -205,22 +218,55 @@ export default {
                             catgID: row['Catg ID'],
                             subCatgID: row['Sub-Catg ID'],
                             schemeFlag: row['Scheme Flag']
-
                         }
                         await MasterInc.create(bodyData);
-                    });
+                    } else if (subject === thersoldSubject) {
+                        var startDate = '';
+                        var endDate = '';
+                        if (row['start_date']) {
+                            startDate = new Date(row['start_date']);
+                            startDate = startDate.toDateString();
+                        }
+                        if (row['end_date']) {
+                            endDate = new Date(row['end_date']);
+                            endDate = endDate.toDateString();
+                        }
 
-                } else if (subject.search(canSubject)) {
-                    const insertResult = data.map(async (index) => {
+                        let thersold = await ThresoldInc.findOne({
+                            where: { schemeCode: row['scheme_code'], fundCode: row['fund_code'] }
+                        });
+                        var masterIncId = null;
+                        if (thersold) {
+                            masterIncId = thersold.id;
+                        }
+                        bodyData = {
+                            masterIncId: masterIncId,
+                            schemeCode: row['scheme_code'],
+                            fundCode: row['fund_code'],
+                            txnType: row['txn_type'],
+                            sysFreq: row['sys_freq'],
+                            sysFreqOpt: row['sys_freq_opt'],
+                            sysDates: row['sys_dates'],
+                            minAmt: row['min_amt'],
+                            maxAmt: row['max_amt'],
+                            multipleAmt: row['multiple_amt'],
+                            minUnits: row['min_units'],
+                            multipleUnits: row['multiple_units'],
+                            minInst: row['min_inst'],
+                            maxInst: row['max_inst'],
+                            sysPerpetual: row['sys_perpetual'],
+                            minCumAmt: row['min_cum_amt'],
+                            startDate: startDate,
+                            endDate: endDate,
+                        }
+                        await ThresoldInc.create(bodyData);
+                    } else if (subject === CDSSubject) {
                         var navDate = '';
-
                         if (row['NAV Date']) {
                             navDate = new Date(row['NAV Date']);
                             navDate = navDate.toDateString();
                         }
-
-
-                        let bodyData = {
+                        bodyData = {
                             can: row['CAN'],
                             canName: row['CAN Name'],
                             fundCode: row['Fund Code'],
@@ -235,7 +281,8 @@ export default {
                             navDate: navDate
                         }
                         await CdsHold.create(bodyData);
-                    });
+                    }
+                    i++;
                 }
             }
             fs.unlink(File, (error) => {
@@ -247,5 +294,29 @@ export default {
         } catch (error) {
             throw Error(error);
         }
+    },
+    getSubject(subject) {
+        let returnData = null;
+        let transactionSubject = "Transaction Response Feed".toLowerCase();
+        let canSubject = "CAN Registration Feed".toLowerCase();
+        let CDSSubject = "Daily CDS Feed".toLowerCase();
+        let masterSubject = "MF Utility-Incremental Scheme".toLowerCase();
+        let thersoldSubject = "thersold".toLowerCase();
+        if (subject.search(transactionSubject) >= 0) {
+            returnData = transactionSubject;
+        }
+        if (subject.search(canSubject) >= 0) {
+            returnData = canSubject;
+        }
+        if (subject.search(CDSSubject) >= 0) {
+            returnData = CDSSubject;
+        }
+        if (subject.search(masterSubject) >= 0) {
+            returnData = masterSubject;
+        }
+        if (subject.search(thersoldSubject) >= 0) {
+            returnData = thersoldSubject;
+        }
+        return returnData;
     }
 } 

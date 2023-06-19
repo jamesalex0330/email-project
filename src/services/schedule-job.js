@@ -21,7 +21,7 @@ export default {
      */
     async deleteMedia() {
         try {
-            // await mediaRepository.findAllAndRemove();
+            await mediaRepository.findAllAndRemove();
         } catch (error) {
             errorLogger.error(JSON.stringify(error));
         }
@@ -32,6 +32,7 @@ export default {
      */
     async getUnreadEmails() {
         try {
+            console.log("Triggered");
             await gmailRepository.getUnreadEmails();
         } catch (error) {
             errorLogger.error(JSON.stringify(error));

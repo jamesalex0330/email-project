@@ -9,67 +9,75 @@ const { Sequelize } = models.sequelize;
 const { UserLead, UserCan, User, MasterInc, ThresoldInc, CdsHold } = models;
 export default {
     async getUnreadEmails() {
-        let email = 'mf.manishshah@gmail.com';
-        let messageList = await gmailService.messageList(email);
-        if (messageList.messages) {
-            let messages = messageList.messages;
-            for await (const message of messages) {
-                let messageId = message.id;
-                let messageDetails = await gmailService.readMail(email, messageId);
-                if (messageDetails) {
-                    let headerArray = messageDetails.payload.headers;
-                    let arrayData = headerArray.find(item => item.name.toLowerCase() === "subject");
-                    let subject = arrayData['value'].toLowerCase();
-                    var getSubject = this.getSubject(subject);
-                    if (getSubject && messageDetails.payload.parts) {
-                        for await (const mailPart of messageDetails.payload.parts) {
-                            if (mailPart.body.attachmentId) {
-                                let attachmentId = mailPart.body.attachmentId;
-                                let result = await gmailService.getAttachment(email, messageId, attachmentId);
-                                var attachmentData = result.data;
-                                if (attachmentData) {
-                                    let getFileName = (mailPart.filename).split('.');
-                                    let getFileExt = getFileName.slice(-1);
-                                    if (getFileExt == "zip") {
-                                        var outputPathZip = path.join(__dirname, `../../Public/uploads/${Date.now()}-${getSubject}.zip`);
-                                        const zipFileData = Buffer.from(attachmentData, 'base64');
-
-
-                                        fs.writeFileSync(outputPathZip, Buffer.from(zipFileData));
-                                        const directory = await unZipper.Open.file(outputPathZip);
-                                        const extract = await directory.files[0].buffer('40071D');          // 40071D is password for zip file.
-                                        const fileData = Buffer.from(extract, 'base64');
-
-
-                                        var outputPath = path.join(__dirname, `../../Public/uploads/${Date.now()}-${getSubject}.dat`);
-                                        fs.writeFileSync(outputPath, Buffer.from(fileData));
-
-
-                                        // for delete zip
-                                        fs.unlink(outputPathZip, (error) => {
-                                            if (error) {
-                                                console.error(`Error deleting file ${outputPathZip}:`, error);
-                                            }
-                                        });
-                                    } else {
-                                        var outputPath = path.join(__dirname, `../../public/uploads/${Date.now()}-${getSubject}.dat`);
-                                        const fileData = Buffer.from(attachmentData, 'base64');
-                                        fs.writeFileSync(outputPath, Buffer.from(fileData));
-                                    }
-                                    await this.importMails(outputPath, getSubject);
-                                }
-                            }
+        try {
+            let email = process.env.EMAIL;
+            let messageList = await gmailService.messageList(email);
+            if (messageList.messages) {
+                let messages = messageList.messages;
+                for await (const message of messages) {
+                    let messageId = message.id;
+                    let messageDetails = await gmailService.readMail(email, messageId);
+                    if (messageDetails) {
+                        let headerArray = messageDetails.payload.headers;
+                        let arrayData = headerArray.find(item => item.name.toLowerCase() === "subject");
+                        let subject = arrayData['value'].toLowerCase();
+                        var getSubject = this.getSubject(subject);
+                        if (getSubject && messageDetails.payload.parts) {
+                            await this.getAttachmentData(messageDetails.payload.parts, email, messageId, getSubject)
                         }
-                    }
-                    
+                    } 
                 }
-                await gmailService.markAsRead(email, messageId)
+                return messageList;
             }
-            return messageList;
+        } catch (error) {
+            throw Error(error);
         }
     },
 
-    async importMails(File, subject) {
+    async getAttachmentData(messageDetails, email, messageId, getSubject) {
+        const transaction = await models.sequelize.transaction();
+        try {
+            for await (const mailPart of messageDetails) {
+                if (mailPart.body.attachmentId) {
+                    let attachmentId = mailPart.body.attachmentId;
+                    let result = await gmailService.getAttachment(email, messageId, attachmentId);
+                    var attachmentData = result.data;
+                    if (attachmentData) {
+                        let getFileName = (mailPart.filename).split('.');
+                        let getFileExt = getFileName.slice(-1);
+                        if (getFileExt == "zip") {
+                            var outputPathZip = path.join(__dirname, `../../Public/uploads/${Date.now()}-${getSubject}.zip`);
+                            const zipFileData = Buffer.from(attachmentData, 'base64');
+                            fs.writeFileSync(outputPathZip, Buffer.from(zipFileData));
+                            const directory = await unZipper.Open.file(outputPathZip);
+                            const extract = await directory.files[0].buffer('40071D');          // 40071D is password for zip file.
+                            const fileData = Buffer.from(extract, 'base64');
+                            var outputPath = path.join(__dirname, `../../Public/uploads/${Date.now()}-${getSubject}.dat`);
+                            fs.writeFileSync(outputPath, Buffer.from(fileData));
+                            // for delete zip
+                            fs.unlink(outputPathZip, (error) => {
+                                if (error) {
+                                    console.error(`Error deleting file ${outputPathZip}:`, error);
+                                }
+                            });
+                        } else {
+                            var outputPath = path.join(__dirname, `../../public/uploads/${Date.now()}-${getSubject}.dat`);
+                            const fileData = Buffer.from(attachmentData, 'base64');
+                            fs.writeFileSync(outputPath, Buffer.from(fileData));
+                        }
+                        await this.importEmailData(outputPath, getSubject, transaction);
+                    }
+                }
+            }
+            await transaction.commit();
+            await gmailService.markAsRead(email, messageId);
+            return true;
+        } catch (error) {
+            await transaction.rollback();
+            throw Error(error);
+        }
+    }, 
+    async importEmailData(File, subject, transaction) {
         try {
             let transactionSubject = "Transaction Response Feed".toLowerCase();
             let canSubject = "CAN Registration Feed".toLowerCase();
@@ -80,7 +88,11 @@ export default {
             const sheetNames = workbook.SheetNames;
             const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetNames[0]]);
             if (data) {
-                let i = 1;
+                console.log(subject);
+                var bodyData = {};
+                var dataArray = [];
+                var i = 1;
+                var subjectType = null;
                 for await (const row of data) {
                     var bodyData = {};
                     if (subject === transactionSubject) {
@@ -99,15 +111,19 @@ export default {
                             let userCanData = await UserCan.findOne({
                                 where: { CAN: row['CAN Number'] }
                             });
+
                             if (userCanData) {
                                 let userData = await User.findOne({
                                     where: { panCard: userCanData.firstHolderPan }
                                 });
+
                                 if (userData) {
                                     userId = userData.id;
                                 }
                             }
+
                         }
+
                         bodyData = {
                             userId: userId,
                             orderNumber: row['Order Number'],
@@ -140,13 +156,16 @@ export default {
                             valueDate: formd,
                             addColumn: row['Addl. Column 1']
                         }
-                        await UserLead.create(bodyData);
+                        subjectType = transactionSubject
+                        dataArray.push(bodyData);
+                        // await UserLead.create(bodyData, { transaction: transaction });
                     } else if (subject === canSubject) {
                         var formd = '';
                         if (row['CAN Reg Date']) {
                             let currentDate = new Date(row['CAN Reg Date']);
                             formd = currentDate.toDateString();
                         }
+
                         bodyData = {
                             arnCode: row['ARN/RIA Code'],
                             EUIN: row['EUIN'],
@@ -160,8 +179,12 @@ export default {
                             eventRemark: row['Event Remarks'],
                             docProof: row['DOC PROOF']
                         }
-                        await UserCan.create(bodyData);
+
+                        subjectType = subject
+                        dataArray.push(bodyData);
+                        // await UserCan.create(bodyData, { transaction: transaction });
                     } else if (subject === masterSubject) {
+
                         var allotDate = '';
                         var reopenDate = '';
                         var maturityDate = '';
@@ -171,22 +194,27 @@ export default {
                             allotDate = new Date(row['allot_date']);
                             allotDate = allotDate.toDateString();
                         }
+
                         if (row['reopen_date']) {
                             reopenDate = new Date(row['reopen_date']);
                             reopenDate = reopenDate.toDateString();
                         }
+
                         if (row['maturityDate']) {
                             maturityDate = new Date(row['maturityDate']);
                             maturityDate = reopenDate.toDateString();
                         }
+
                         if (row['nfo_start']) {
                             nfoStart = new Date(row['nfo_start']);
                             nfoStart = nfoStart.toDateString();
                         }
+
                         if (row['nfo_end']) {
                             nfoEnd = new Date(row['nfo_end']);
                             nfoEnd = nfoEnd.toDateString();
                         }
+
                         bodyData = {
                             schemeCode: row['scheme_code'],
                             fundCode: row['fund_code'],
@@ -218,19 +246,27 @@ export default {
                             catgID: row['Catg ID'],
                             subCatgID: row['Sub-Catg ID'],
                             schemeFlag: row['Scheme Flag']
+
                         }
-                        await MasterInc.create(bodyData);
+
+                        subjectType = subject
+                        dataArray.push(bodyData);
+                        // await MasterInc.create(bodyData, { transaction: transaction });
+
                     } else if (subject === thersoldSubject) {
                         var startDate = '';
                         var endDate = '';
+
                         if (row['start_date']) {
                             startDate = new Date(row['start_date']);
                             startDate = startDate.toDateString();
                         }
+
                         if (row['end_date']) {
                             endDate = new Date(row['end_date']);
                             endDate = endDate.toDateString();
                         }
+
 
                         let thersold = await ThresoldInc.findOne({
                             where: { schemeCode: row['scheme_code'], fundCode: row['fund_code'] }
@@ -239,6 +275,7 @@ export default {
                         if (thersold) {
                             masterIncId = thersold.id;
                         }
+
                         bodyData = {
                             masterIncId: masterIncId,
                             schemeCode: row['scheme_code'],
@@ -258,8 +295,11 @@ export default {
                             minCumAmt: row['min_cum_amt'],
                             startDate: startDate,
                             endDate: endDate,
+
                         }
-                        await ThresoldInc.create(bodyData);
+                        subjectType = subject
+                        dataArray.push(bodyData);
+                        // await ThresoldInc.create(bodyData, { transaction: transaction });
                     } else if (subject === CDSSubject) {
                         var navDate = '';
                         if (row['NAV Date']) {
@@ -280,16 +320,30 @@ export default {
                             nav: row['NAV'],
                             navDate: navDate
                         }
-                        await CdsHold.create(bodyData);
+                        subjectType = subject
+                        dataArray.push(bodyData);
+                        // await CdsHold.create(bodyData, { transaction: transaction });
                     }
-                    i++;
                 }
+                i++;
+            }
+            if (subjectType === transactionSubject) {
+                await UserLead.bulkCreate(dataArray, { transaction: transaction });
+            } else if (subjectType === canSubject) {
+                await UserCan.bulkCreate(dataArray, { transaction: transaction });
+            } else if (subjectType === masterSubject) {
+                await MasterInc.bulkCreate(dataArray, { transaction: transaction });
+            } else if (subjectType === thersoldSubject) {
+                await ThresoldInc.bulkCreate(dataArray, { transaction: transaction });
+            } else if (subjectType === CDSSubject) {
+                await CdsHold.bulkCreate(dataArray, { transaction: transaction });
             }
             fs.unlink(File, (error) => {
                 if (error) {
                     console.error(`Error deleting file ${File}:`, error);
                 }
             });
+
             return true;
         } catch (error) {
             throw Error(error);

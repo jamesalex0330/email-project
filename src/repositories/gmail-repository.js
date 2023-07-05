@@ -6,10 +6,11 @@ import path from "path";
 const unZipper = require("unzipper");
 const fs = require('fs');
 const { Sequelize } = models.sequelize;
-const { UserLead, UserCan, User, MasterInc, ThresoldInc, CdsHold } = models;
+const { UserLead, UserCan, User, MasterInc, ThresoldInc, CdsHold, ReadMail } = models;
 export default {
     async getUnreadEmails() {
         try {
+
             let email = process.env.EMAIL;
             let messageList = await gmailService.messageList(email);
             if (messageList.messages) {
@@ -22,14 +23,19 @@ export default {
                         let arrayData = headerArray.find(item => item.name.toLowerCase() === "subject");
                         let subject = arrayData['value'].toLowerCase();
                         var getSubject = this.getSubject(subject);
+                        console.log(messageId, "messageId");
+                        console.log(getSubject, "getSubject");
                         if (getSubject && messageDetails.payload.parts) {
                             await this.getAttachmentData(messageDetails.payload.parts, email, messageId, getSubject)
+                        } else {
+                            await gmailService.markAsRead(email, messageId);
                         }
-                    } 
+                    }
                 }
                 return messageList;
             }
         } catch (error) {
+            console.log(error, "error");
             throw Error(error);
         }
     },
@@ -37,46 +43,51 @@ export default {
     async getAttachmentData(messageDetails, email, messageId, getSubject) {
         const transaction = await models.sequelize.transaction();
         try {
-            for await (const mailPart of messageDetails) {
-                if (mailPart.body.attachmentId) {
-                    let attachmentId = mailPart.body.attachmentId;
-                    let result = await gmailService.getAttachment(email, messageId, attachmentId);
-                    var attachmentData = result.data;
-                    if (attachmentData) {
-                        let getFileName = (mailPart.filename).split('.');
-                        let getFileExt = getFileName.slice(-1);
-                        if (getFileExt == "zip") {
-                            var outputPathZip = path.join(__dirname, `../../Public/uploads/${Date.now()}-${getSubject}.zip`);
-                            const zipFileData = Buffer.from(attachmentData, 'base64');
-                            fs.writeFileSync(outputPathZip, Buffer.from(zipFileData));
-                            const directory = await unZipper.Open.file(outputPathZip);
-                            const extract = await directory.files[0].buffer('40071D');          // 40071D is password for zip file.
-                            const fileData = Buffer.from(extract, 'base64');
-                            var outputPath = path.join(__dirname, `../../Public/uploads/${Date.now()}-${getSubject}.dat`);
-                            fs.writeFileSync(outputPath, Buffer.from(fileData));
-                            // for delete zip
-                            fs.unlink(outputPathZip, (error) => {
-                                if (error) {
-                                    console.error(`Error deleting file ${outputPathZip}:`, error);
-                                }
-                            });
-                        } else {
-                            var outputPath = path.join(__dirname, `../../public/uploads/${Date.now()}-${getSubject}.dat`);
-                            const fileData = Buffer.from(attachmentData, 'base64');
-                            fs.writeFileSync(outputPath, Buffer.from(fileData));
+
+            var checkMessageExist = await ReadMail.findOne({ where: { messageId: messageId } });
+            if (!checkMessageExist) {
+                for await (const mailPart of messageDetails) {
+                    if (mailPart.body.attachmentId) {
+                        let attachmentId = mailPart.body.attachmentId;
+                        let result = await gmailService.getAttachment(email, messageId, attachmentId);
+                        var attachmentData = result.data;
+                        if (attachmentData) {
+                            let getFileName = (mailPart.filename).split('.');
+                            let getFileExt = getFileName.slice(-1);
+                            if (getFileExt == "zip") {
+                                var outputPathZip = path.join(__dirname, `../../Public/uploads/${Date.now()}-${getSubject}.zip`);
+                                const zipFileData = Buffer.from(attachmentData, 'base64');
+                                fs.writeFileSync(outputPathZip, Buffer.from(zipFileData));
+                                const directory = await unZipper.Open.file(outputPathZip);
+                                const extract = await directory.files[0].buffer('40071D');          // 40071D is password for zip file.
+                                const fileData = Buffer.from(extract, 'base64');
+                                var outputPath = path.join(__dirname, `../../Public/uploads/${Date.now()}-${getSubject}.dat`);
+                                fs.writeFileSync(outputPath, Buffer.from(fileData));
+                                // for delete zip
+                                fs.unlink(outputPathZip, (error) => {
+                                    if (error) {
+                                        console.error(`Error deleting file ${outputPathZip}:`, error);
+                                    }
+                                });
+                            } else {
+                                var outputPath = path.join(__dirname, `../../public/uploads/${Date.now()}-${getSubject}.dat`);
+                                const fileData = Buffer.from(attachmentData, 'base64');
+                                fs.writeFileSync(outputPath, Buffer.from(fileData));
+                            }
+                            await this.importEmailData(outputPath, getSubject, transaction);
                         }
-                        await this.importEmailData(outputPath, getSubject, transaction);
                     }
                 }
+                await ReadMail.create({ 'messageId': messageId, 'subject': getSubject }, transaction);
+                await transaction.commit();
+                await gmailService.markAsRead(email, messageId);
+                return true;
             }
-            await transaction.commit();
-            await gmailService.markAsRead(email, messageId);
-            return true;
         } catch (error) {
             await transaction.rollback();
             throw Error(error);
         }
-    }, 
+    },
     async importEmailData(File, subject, transaction) {
         try {
             let transactionSubject = "Transaction Response Feed".toLowerCase();

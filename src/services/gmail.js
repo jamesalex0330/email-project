@@ -27,11 +27,9 @@ const getRefreshToken = async () => {
             return new Promise(async (resolve, reject) => {
                 oAuth2Client.refreshAccessToken(async (err, tokens) => {
                     if (err) {
-                        loggers.error(`error: ${err}`);
                         reject(false);
                     } else {
                         // Save the new access token for future use
-                        // oAuth2Client.setCredentials(tokens);
                         await Setting.update({ value: JSON.stringify(tokens) }, { where: { field: "googleAuth" } });
                         resolve(tokens.access_token);
                     }
@@ -46,7 +44,6 @@ const getRefreshToken = async () => {
         return new Promise(async (resolve, reject) => {
             oAuth2Client.refreshAccessToken(async (err, tokens) => {
                 if (err) {
-                    loggers.error(`error: ${err}`);
                     reject(false);
                 } else {
                     // Save the new access token for future use
@@ -60,7 +57,7 @@ const getRefreshToken = async () => {
 async function messageList(email) {
     try {
         await getRefreshToken();
-        const url = `https://gmail.googleapis.com/gmail/v1/users/${email}/messages?q=is:unread`;
+        const url = `https://gmail.googleapis.com/gmail/v1/users/${email}/messages?q=is:unread&maxResults=10`;
         const { token } = await oAuth2Client.getAccessToken();
         const config = generateConfig(url, token);
         const response = await axios(config);

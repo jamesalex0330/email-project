@@ -26,7 +26,7 @@ export default {
                         console.log(messageId, "messageId");
                         console.log(getSubject, "getSubject");
                         if (getSubject && messageDetails.payload.parts) {
-                            await this.getAttachmentData(messageDetails.payload.parts, email, messageId, getSubject)
+                            await this.getAttachmentData(messageDetails.payload.parts, email, messageId, getSubject,subject)
                         } else {
                             await gmailService.markAsRead(email, messageId);
                         }
@@ -40,7 +40,7 @@ export default {
         }
     },
 
-    async getAttachmentData(messageDetails, email, messageId, getSubject) {
+    async getAttachmentData(messageDetails, email, messageId, getSubject,subject) {
         const transaction = await models.sequelize.transaction();
         try {
 
@@ -78,7 +78,7 @@ export default {
                         }
                     }
                 }
-                await readMail.create({ 'messageId': messageId, 'subject': getSubject }, transaction);
+                await readMail.create({ 'messageId': messageId, 'subject': subject }, transaction);
                 await transaction.commit();
                 await gmailService.markAsRead(email, messageId);
                 return true;

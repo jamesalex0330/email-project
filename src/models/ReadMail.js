@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-    const ReadMail = sequelize.define(
-        'ReadMail',
+    const readMail = sequelize.define(
+        'readMail',
         {
             messageId: {
                 type: DataTypes.STRING(245)
@@ -13,5 +13,5 @@ module.exports = (sequelize, DataTypes) => {
             underscored: true
         },
     );
-    return ReadMail;
+    return readMail;
 };

@@ -1,8 +1,6 @@
-import config from "../config";
-
 module.exports = (sequelize, DataTypes) => {
-  const User = sequelize.define(
-    "User",
+  const user = sequelize.define(
+    "user",
     {
       firstName: {
         type: DataTypes.STRING(50),
@@ -26,13 +24,13 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(50),
       }
     }, {
-      underscored: false,
+      underscored: true,
       indexes: [
         {
-          fields: ['panCard']
+          fields: ['pan_card']
         }
       ]
     }
   );
-  return User;
+  return user;
 };

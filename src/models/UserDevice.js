@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-  const UserDevice = sequelize.define(
-    'UserDevice',
+  const userDevice = sequelize.define(
+    'userDevice',
     {
       userId: {
         type: DataTypes.INTEGER
@@ -13,10 +13,10 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true
     },
   );
-  UserDevice.associate = function (models) {
-    UserDevice.belongsTo(models.User, {
+  userDevice.associate = function (models) {
+    userDevice.belongsTo(models.user, {
       foreignKey: 'userId', onDelete: 'cascade'
     });
   };
-  return UserDevice;
+  return userDevice;
 };

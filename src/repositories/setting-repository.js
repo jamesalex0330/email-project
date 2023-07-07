@@ -2,7 +2,7 @@ import models from '../models';
 import config from '../config';
 import utility from '../services/utility';
 const { exec } = require('child_process');
-const { Setting, Country, State, City } = models;
+const { setting, country, state, city } = models;
 
 export default {
 
@@ -17,7 +17,7 @@ export default {
       if (req.query.settingType) {
         where.settingType = req.query.settingType;
       }
-      const results = await Setting.findAll({
+      const results = await setting.findAll({
         where: where
       });
       results.forEach((data, index) => {
@@ -42,7 +42,7 @@ export default {
   async updateSettings(req) {
     try {
       for (const [key, value] of Object.entries(req.body)) {
-        await Setting.update({ value: value }, { where: { key: key } });
+        await setting.update({ value: value }, { where: { key: key } });
       }
       return true;
     } catch (error) {
@@ -58,20 +58,14 @@ export default {
     try {
       let res = '';
       let envKey = '';
-      let isSetting = await Setting.findOne({ where: { key: 'is_country_setting' } });
+      let isSetting = await setting.findOne({ where: { key: 'is_country_setting' } });
       if (isSetting.value == 0) {
         for (const [key, value] of Object.entries(req.body)) {
-          res = await Setting.update({ value: value }, { where: { key: key } });
-          if (key === 'country_phone_code') {
-            envKey = 'COUNTRY_PHONE_CODE';
-          }
-          if (key === 'currency_abbr') {
-            envKey = 'CURRENCY_ABBR';
-          }
+          res = await setting.update({ value: value }, { where: { key: key } });
           utility.setEnvValue(envKey, value);
         }
         if (res) {
-          await Setting.update({ value: 1 }, { where: { key: 'is_country_setting' } });
+          await setting.update({ value: 1 }, { where: { key: 'is_country_setting' } });
           exec(
             `sudo pm2 restart monay-api/index.js`,
             { maxBuffer: 1024 * 2084 }, async (err, stdout, stderr) => {
@@ -95,7 +89,7 @@ export default {
   */
   async getCountryList(req) {
     try {
-      return await Country.findAll();
+      return await country.findAll();
     } catch (error) {
       throw Error(error);
     }
@@ -109,7 +103,7 @@ export default {
   async getStateList(countryId) {
     try {
       let where = {countryId};
-      return State.findAll(
+      return state.findAll(
         {where:where}
       );
     } catch(error) {
@@ -125,7 +119,7 @@ export default {
    async getCityList(stateId) {
     try {
       let where = {stateId};
-      return City.findAll(
+      return city.findAll(
         {where:where}
       );
     } catch(error) {

@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-    const Setting = sequelize.define(
-      'Setting',
+    const setting = sequelize.define(
+      'setting',
       {
         field: {
           type: DataTypes.STRING(245)
@@ -14,6 +14,6 @@ module.exports = (sequelize, DataTypes) => {
       },
     );
     
-    return Setting;
+    return setting;
   };
   

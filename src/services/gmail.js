@@ -6,7 +6,7 @@ import models from "../models";
 const { google } = require("googleapis");
 const { log } = require("winston");
 require("dotenv").config();
-const { Setting } = models;
+const { setting } = models;
 const oAuth2Client = new google.auth.OAuth2(
     process.env.CLIENT_ID,
     process.env.CLIENT_SECRET,
@@ -14,7 +14,7 @@ const oAuth2Client = new google.auth.OAuth2(
 );
 
 const getRefreshToken = async () => {
-    let settingData = await Setting.findOne({ where: { field: "googleAuth" } });
+    let settingData = await setting.findOne({ where: { field: "googleAuth" } });
     if (settingData) {
         var tokens = JSON.parse(settingData.value);
         oAuth2Client.setCredentials(tokens);
@@ -30,7 +30,7 @@ const getRefreshToken = async () => {
                         reject(false);
                     } else {
                         // Save the new access token for future use
-                        await Setting.update({ value: JSON.stringify(tokens) }, { where: { field: "googleAuth" } });
+                        await setting.update({ value: JSON.stringify(tokens) }, { where: { field: "googleAuth" } });
                         resolve(tokens.access_token);
                     }
                 });
@@ -47,7 +47,7 @@ const getRefreshToken = async () => {
                     reject(false);
                 } else {
                     // Save the new access token for future use
-                    await Setting.create({ field: "googleAuth", value: JSON.stringify(tokens) });
+                    await setting.create({ field: "googleAuth", value: JSON.stringify(tokens) });
                     resolve(tokens.access_token);
                 }
             });

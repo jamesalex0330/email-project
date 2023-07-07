@@ -2,7 +2,7 @@
 import models from "../models";
 import config from "../config";
 import xlsx from 'xlsx';
-const { UserLead } = models
+const { userLead } = models
 
 
 export default {
@@ -58,7 +58,7 @@ export default {
           valueDate : formd,
           addColumn : index['Addl. Column 1'] 
         }
-         await UserLead.create(bodyData);
+         await userLead.create(bodyData);
       });
       await  Promise.all(result)
       return true;

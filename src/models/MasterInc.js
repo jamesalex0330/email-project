@@ -1,8 +1,6 @@
-import config from "../config";
-
 module.exports = (sequelize, DataTypes) => {
-  const MasterInc = sequelize.define(
-    "MasterInc",
+  const masterInc = sequelize.define(
+    "masterInc",
     {
       schemeCode: {
         type: DataTypes.STRING(50),
@@ -95,8 +93,8 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(255),
       }
     }, {
-      underscored: false
+      underscored: true
     }
   );
-  return MasterInc;
+  return masterInc;
 };

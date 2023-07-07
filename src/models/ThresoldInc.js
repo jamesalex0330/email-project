@@ -1,8 +1,6 @@
-import config from "../config";
-
 module.exports = (sequelize, DataTypes) => {
-  const ThresoldInc = sequelize.define(
-    "ThresoldInc",
+  const thresoldInc = sequelize.define(
+    "thresoldInc",
     {
       masterIncId: {
         type: DataTypes.INTEGER,
@@ -61,15 +59,15 @@ module.exports = (sequelize, DataTypes) => {
       }    
      
     }, {
-      underscored: false
+      underscored: true
     }
   );
-  ThresoldInc.associate = function (models) {
-    ThresoldInc.belongsTo(models.MasterInc, {
+  thresoldInc.associate = function (models) {
+    thresoldInc.belongsTo(models.masterInc, {
       foreignKey: "masterIncId",
       onDelete: "cascade",
       onUpdate: "cascade",
     });   
   };
-  return ThresoldInc;
+  return thresoldInc;
 };

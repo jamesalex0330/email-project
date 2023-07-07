@@ -5,7 +5,7 @@ import config from "../config";
 import jwt from "../services/jwt";
 import httpStatus from "http-status";
 const { Sequelize } = models.sequelize;
-const { User, UserToken, UserDevice } = models
+const { user, userToken } = models
 export default {
   async createHashPassword(password) {
     try {
@@ -21,7 +21,7 @@ export default {
       let bodyData = req.body;
       let hashPassword = await this.createHashPassword(bodyData.password);
       bodyData.password = hashPassword;
-      let userData = await User.create(bodyData);
+      let userData = await user.create(bodyData);
 
 
       if (userData) {
@@ -51,9 +51,9 @@ export default {
 
     try {
       let { email, password, deviceType } = req.body;
-      const user = await User.findOne({ where: { email: req.body.email } });
-      if (user) {
-        const isPasswordMatch = await this.compareUserPassword(password, user.password);
+      const userDetail = await user.findOne({ where: { email: req.body.email } });
+      if (userDetail) {
+        const isPasswordMatch = await this.compareUserPassword(password, userDetail.password);
         if (!isPasswordMatch) {
           res.json({
             success: true,
@@ -62,7 +62,7 @@ export default {
         }
         // var userdata = { id: user.id, email: user.email, userRole: user.userRole }
         if (isPasswordMatch) {
-          const { password, ...userData } = user.get();
+          const { password, ...userData } = userDetail.get();
           const token = jwt.createToken(userData);
           let userAccessToken = await token.then(e=>e);
           const deviceData = {
@@ -87,7 +87,7 @@ export default {
  */
   async findOne(whereObj) {
     try {
-      return await User.findOne({
+      return await user.findOne({
         where: whereObj,
         attributes: {
           exclude: ["password", "verifyToken"],
@@ -134,10 +134,10 @@ export default {
  */
   async getUserDeviceToken(userId) {
     try {
-      let userToken = await UserToken.findOne({
+      let userTokenData = await userToken.findOne({
         where: { userId },
       });
-      return userToken;
+      return userTokenData;
     } catch (error) {
       throw Error(error);
     }
@@ -163,7 +163,7 @@ export default {
    */
     async addUserDevice(data) {
       try {
-        return await UserToken.create(data);
+        return await userToken.create(data);
       } catch (error) {
         throw Error(error);
       }
@@ -178,7 +178,7 @@ export default {
       const where = {
         access_token: token,
       };
-      return await UserToken.findOne({
+      return await userToken.findOne({
         where,
       });
     } catch (error) {

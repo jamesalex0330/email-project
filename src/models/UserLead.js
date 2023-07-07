@@ -1,8 +1,6 @@
-import config from "../config";
-
 module.exports = (sequelize, DataTypes) => {
-  const UserLead = sequelize.define(
-    "UserLead",
+  const userLead = sequelize.define(
+    "userLead",
     {
       userId: {
         type: DataTypes.INTEGER,
@@ -54,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(100),
       },
       amount: {
-        type: DataTypes.DECIMAL(20, 15),
+        type: DataTypes.NUMERIC(17,8),
       },
       units: {
         type: DataTypes.STRING(100),
@@ -96,20 +94,20 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(100),
       }
     }, {
-      underscored: false,
+      underscored: true,
       indexes: [
         {
-          fields: ['canNumber']
+          fields: ['can_number']
         }
       ]
     }
   );
-  UserLead.associate = function (models) {
-    UserLead.belongsTo(models.User, {
+  userLead.associate = function (models) {
+    userLead.belongsTo(models.user, {
       foreignKey: "userId",
       onDelete: "cascade",
       onUpdate: "cascade",
     });   
   };
-  return UserLead;
+  return userLead;
 };

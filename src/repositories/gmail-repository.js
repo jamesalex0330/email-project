@@ -6,7 +6,7 @@ import path from "path";
 const unZipper = require("unzipper");
 const fs = require('fs');
 const { Sequelize } = models.sequelize;
-const { UserLead, UserCan, User, MasterInc, ThresoldInc, CdsHold, ReadMail } = models;
+const { userLead, userCan, user, masterInc, thresoldInc, cdsHold, readMail } = models;
 export default {
     async getUnreadEmails() {
         try {
@@ -44,7 +44,7 @@ export default {
         const transaction = await models.sequelize.transaction();
         try {
 
-            var checkMessageExist = await ReadMail.findOne({ where: { messageId: messageId } });
+            var checkMessageExist = await readMail.findOne({ where: { messageId: messageId } });
             if (!checkMessageExist) {
                 for await (const mailPart of messageDetails) {
                     if (mailPart.body.attachmentId) {
@@ -78,7 +78,7 @@ export default {
                         }
                     }
                 }
-                await ReadMail.create({ 'messageId': messageId, 'subject': getSubject }, transaction);
+                await readMail.create({ 'messageId': messageId, 'subject': getSubject }, transaction);
                 await transaction.commit();
                 await gmailService.markAsRead(email, messageId);
                 return true;
@@ -119,8 +119,8 @@ export default {
                         }
                         let userId = null;
                         if (row['CAN Number']) {
-                            let userCanData = await UserCan.findOne({
-                                where: { CAN: row['CAN Number'] }
+                            let userCanData = await userCan.findOne({
+                                where: { can: row['CAN Number'] }
                             });
 
                             if (userCanData) {
@@ -180,9 +180,9 @@ export default {
                         bodyData = {
                             arnCode: row['ARN/RIA Code'],
                             EUIN: row['EUIN'],
-                            CAN: row['CAN'],
-                            CANRegDate: formd,
-                            CANRegMode: row['CAN Reg Mode'],
+                            can: row['CAN'],
+                            canRegDate: formd,
+                            canRegMode: row['CAN Reg Mode'],
                             canStatus: row['CAN Status'],
                             firstHolderPan: row['First Holder PAN'],
                             firstHolderName: row['First Holder Name'],
@@ -279,7 +279,7 @@ export default {
                         }
 
 
-                        let thersold = await ThresoldInc.findOne({
+                        let thersold = await thresoldInc.findOne({
                             where: { schemeCode: row['scheme_code'], fundCode: row['fund_code'] }
                         });
                         var masterIncId = null;
@@ -339,15 +339,15 @@ export default {
                 i++;
             }
             if (subjectType === transactionSubject) {
-                await UserLead.bulkCreate(dataArray, { transaction: transaction });
+                await userLead.bulkCreate(dataArray, { transaction: transaction });
             } else if (subjectType === canSubject) {
-                await UserCan.bulkCreate(dataArray, { transaction: transaction });
+                await userCan.bulkCreate(dataArray, { transaction: transaction });
             } else if (subjectType === masterSubject) {
-                await MasterInc.bulkCreate(dataArray, { transaction: transaction });
+                await masterInc.bulkCreate(dataArray, { transaction: transaction });
             } else if (subjectType === thersoldSubject) {
-                await ThresoldInc.bulkCreate(dataArray, { transaction: transaction });
+                await thresoldInc.bulkCreate(dataArray, { transaction: transaction });
             } else if (subjectType === CDSSubject) {
-                await CdsHold.bulkCreate(dataArray, { transaction: transaction });
+                await cdsHold.bulkCreate(dataArray, { transaction: transaction });
             }
             fs.unlink(File, (error) => {
                 if (error) {

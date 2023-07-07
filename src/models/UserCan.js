@@ -1,22 +1,20 @@
-import config from "../config";
-
 module.exports = (sequelize, DataTypes) => {
-  const UserCan = sequelize.define(
-    "UserCan",
+  const userCan = sequelize.define(
+    "userCan",
     {
       arnCode: {
         type: DataTypes.STRING(255),
       },
-      EUIN: {
+      euin: {
         type: DataTypes.STRING(255),
       },
-      CAN: {
+      can: {
         type: DataTypes.STRING(255),
       },
-      CANRegDate: {
+      canRegDate: {
         type: DataTypes.STRING(255),
       },
-      CANRegMode: {
+      canRegMode: {
         type: DataTypes.STRING(255),
       },
       canStatus: {
@@ -38,13 +36,13 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(255),
       }      
     }, {
-      underscored: false,
+      underscored: true,
       indexes: [
         {
-          fields: ['firstHolderPan','CAN']
+          fields: ['first_holder_pan','can']
         }
       ]
     }
   );
-  return UserCan;
+  return userCan;
 };

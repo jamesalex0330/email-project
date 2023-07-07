@@ -5,7 +5,7 @@ import config from "../config";
 import jwt from "../services/jwt";
 import httpStatus from "http-status";
 const { Sequelize } = models.sequelize;
-const { User, CdsHold, UserLead } = models
+const { user, cdsHold, userLead } = models
 export default {
 
   async dashboard(req, t) {
@@ -15,7 +15,7 @@ export default {
       const queryData = query;
       let userId = req.user.id;
       let investedData = {};
-      const leadData = await UserLead.findOne(
+      const leadData = await userLead.findOne(
         {
           where: { userId: userId },
           attributes: {
@@ -27,25 +27,30 @@ export default {
           raw: true
         }
       );
-      const csdData = await CdsHold.findOne(
+      
+      const csdData = await cdsHold.findOne(
         {
           attributes: {
             include: [
-              [Sequelize.fn('ROUND', Sequelize.fn('SUM', Sequelize.col('currentValue')), 2), 'currentValue']
+              [Sequelize.fn('ROUND', Sequelize.fn('SUM', Sequelize.col('current_value')), 2), 'currentValue']
             ]
           },
           group: ["id"],
           raw: true
         }
       );
-      investedData.invested = leadData.sum_amount;
+      investedData.invested = leadData?.sum_amount;
       investedData.current = csdData.currentValue;
-      let fundData = await CdsHold.findAndCountAll(
+      let canNumber = null;
+      if(leadData?.canNumber){
+        canNumber = leadData?.canNumber;
+      }
+      let fundData = await cdsHold.findAndCountAll(
         {
           attributes: {
             exclude: ["id", "canName", "fundCode", "schemeCode", "schemeName", "folioNumber", "folioCheckDigit", "navDate", 'createdAt', 'updatedAt'],
           },
-          where: { 'can': leadData.canNumber },
+          where: { 'can': canNumber },
           limit: parseInt(queryData.limit || 10),
           offset: parseInt(queryData.offset || 0)
         },
@@ -66,7 +71,7 @@ export default {
  */
   async findOne(whereObj) {
     try {
-      return await User.findOne({
+      return await user.findOne({
         where: whereObj,
         attributes: {
           exclude: ["password", "verifyToken"],

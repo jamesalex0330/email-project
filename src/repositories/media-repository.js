@@ -1,5 +1,5 @@
 import models from "../models";
-const { MediaTemp, UserLead, UserCan,User, MasterInc ,ThresoldInc, CdsHold} = models;
+const { userLead, userCan, user, masterInc, thresoldInc, cdsHold} = models;
 import multer from "multer";
 import xlsx from 'xlsx';
 import path from 'path';
@@ -69,12 +69,12 @@ export default {
             orderTime = orderTimeDate.toDateString();
           }
           let userId = null;
-          let userCanData = await UserCan.findOne({
+          let userCanData = await userCan.findOne({
             where: { CAN: index['CAN Number'] }
           });
 
           if(userCanData){
-            let userData = await User.findOne({
+            let userData = await user.findOne({
               where: { panCard: userCanData.firstHolderPan }
             });
 
@@ -115,7 +115,7 @@ export default {
             valueDate: formd,
             addColumn: index['Addl. Column 1']
           }
-          await UserLead.create(bodyData);
+          await userLead.create(bodyData);
         });
         await Promise.all(insertResult);
       } else if (params.mediaFor == "can") {
@@ -139,7 +139,7 @@ export default {
             eventRemark: index['Event Remarks'],
             docProof: index['DOC PROOF']
           }
-          await UserCan.create(bodyData);
+          await userCan.create(bodyData);
         });
         await Promise.all(insertResult);
       }  else if (params.mediaFor == "master") {
@@ -208,7 +208,7 @@ export default {
             schemeFlag: index['Scheme Flag']          
 
           }
-          await MasterInc.create(bodyData);
+          await masterInc.create(bodyData);
         });
 
       } else if (params.mediaFor == "thersold") {
@@ -227,7 +227,7 @@ export default {
           }
           
           
-          let thersold = await ThresoldInc.findOne({
+          let thersold = await thresoldInc.findOne({
             where: { schemeCode: index['scheme_code'], fundCode: index['fund_code']}
           });
           var masterIncId = null;
@@ -256,7 +256,7 @@ export default {
             endDate: endDate,                   
 
           }
-          await ThresoldInc.create(bodyData);
+          await thresoldInc.create(bodyData);
         });
       } else if(params.mediaFor == "cds-hold") {
         const insertResult = data.map(async (index) => {
@@ -282,7 +282,7 @@ export default {
             nav: index['NAV'],           
             navDate: navDate
           }
-          await CdsHold.create(bodyData);
+          await cdsHold.create(bodyData);
         });
       }
 

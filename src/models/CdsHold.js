@@ -1,8 +1,6 @@
-import config from "../config";
-
 module.exports = (sequelize, DataTypes) => {
-  const CdsHold = sequelize.define(
-    "CdsHold",
+  const cdsHold = sequelize.define(
+    "cdsHold",
     {
       can: {
         type: DataTypes.STRING(255),
@@ -32,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(255),
       },
       currentValue: {
-        type: DataTypes.DECIMAL(20, 15),
+        type: DataTypes.NUMERIC(17,8),
       },
       nav: {
         type: DataTypes.STRING(255),
@@ -42,13 +40,13 @@ module.exports = (sequelize, DataTypes) => {
       }
 
     }, {
-    underscored: false,
+    underscored: true,
     indexes: [
       {
-        fields: ['nav','currentValue','unitHolding','folioNumber','can']
+        fields: ['nav','current_value','unit_holding','folio_number','can']
       }
     ]
   }
   );
-  return CdsHold;
+  return cdsHold;
 };

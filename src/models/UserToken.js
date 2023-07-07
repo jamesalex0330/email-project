@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-  const UserTokens = sequelize.define(
-    'UserToken',
+  const userTokens = sequelize.define(
+    'userToken',
     {
       userId: {
         type: DataTypes.INTEGER
@@ -16,10 +16,10 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true
     }
   );
-  UserTokens.associate = function (models) {
-    UserTokens.belongsTo(models.User, {
+  userTokens.associate = function (models) {
+    userTokens.belongsTo(models.user, {
       foreignKey: 'userId', onDelete: 'cascade'
     });
   };
-  return UserTokens;
+  return userTokens;
 };

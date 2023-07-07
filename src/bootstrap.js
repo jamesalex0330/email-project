@@ -158,6 +158,6 @@ export default class Bootstrap {
      */
     scheduleJob() {
         schedule.scheduleJob('* */1 * * *', scheduleJob.deleteMedia);
-        // schedule.scheduleJob('* */1 * * *', scheduleJob.getUnreadEmails);
+        schedule.scheduleJob('* */1 * * *', scheduleJob.getUnreadEmails);
     }
 }

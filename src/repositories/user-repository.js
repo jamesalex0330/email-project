@@ -45,7 +45,7 @@ export default {
       if(leadData?.canNumber){
         canNumber = leadData?.canNumber;
       }
-      let fundData = await cdsHold.findAndCountAll(
+      let fundData = await cdsHold.findAll(
         {
           attributes: {
             exclude: ["id", "canName", "fundCode", "schemeCode", "schemeName", "folioNumber", "folioCheckDigit", "navDate", 'createdAt', 'updatedAt'],

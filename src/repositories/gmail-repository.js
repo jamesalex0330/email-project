@@ -6,11 +6,10 @@ import path from "path";
 const unZipper = require("unzipper");
 const fs = require('fs');
 const { Sequelize } = models.sequelize;
-const { userLead, userCan, user, masterInc, thresoldInc, cdsHold, readMail } = models;
+const { userLead, userCan, user, masterInc, thresholdInc, cdsHold, readMail } = models;
 export default {
     async getUnreadEmails() {
         try {
-
             let email = process.env.EMAIL;
             let messageList = await gmailService.messageList(email);
             if (messageList.messages) {
@@ -279,7 +278,7 @@ export default {
                         }
 
 
-                        let thersold = await thresoldInc.findOne({
+                        let thersold = await thresholdInc.findOne({
                             where: { schemeCode: row['scheme_code'], fundCode: row['fund_code'] }
                         });
                         var masterIncId = null;
@@ -310,7 +309,7 @@ export default {
                         }
                         subjectType = subject
                         dataArray.push(bodyData);
-                        // await ThresoldInc.create(bodyData, { transaction: transaction });
+                        // await thresholdInc.create(bodyData, { transaction: transaction });
                     } else if (subject === CDSSubject) {
                         var navDate = '';
                         if (row['NAV Date']) {
@@ -345,7 +344,7 @@ export default {
             } else if (subjectType === masterSubject) {
                 await masterInc.bulkCreate(dataArray, { transaction: transaction });
             } else if (subjectType === thersoldSubject) {
-                await thresoldInc.bulkCreate(dataArray, { transaction: transaction });
+                await thresholdInc.bulkCreate(dataArray, { transaction: transaction });
             } else if (subjectType === CDSSubject) {
                 await cdsHold.bulkCreate(dataArray, { transaction: transaction });
             }

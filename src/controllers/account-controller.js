@@ -47,7 +47,7 @@ export default {
       if (user) {
         res.status(HttpStatus.OK).json({
           success: true,
-          data: { 'token': user },
+          data: user,
         });
 
       } else {

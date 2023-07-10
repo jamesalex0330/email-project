@@ -1,5 +1,5 @@
 import models from "../models";
-const { userLead, userCan, user, masterInc, thresoldInc, cdsHold} = models;
+const { userLead, userCan, user, masterInc, thresholdInc, cdsHold} = models;
 import multer from "multer";
 import xlsx from 'xlsx';
 import path from 'path';
@@ -227,7 +227,7 @@ export default {
           }
           
           
-          let thersold = await thresoldInc.findOne({
+          let thersold = await thresholdInc.findOne({
             where: { schemeCode: index['scheme_code'], fundCode: index['fund_code']}
           });
           var masterIncId = null;
@@ -256,7 +256,7 @@ export default {
             endDate: endDate,                   
 
           }
-          await thresoldInc.create(bodyData);
+          await thresholdInc.create(bodyData);
         });
       } else if(params.mediaFor == "cds-hold") {
         const insertResult = data.map(async (index) => {

@@ -60,25 +60,26 @@ export default {
             data: 'incorrect PASSWORD'
           })
         }
-        // var userdata = { id: user.id, email: user.email, userRole: user.userRole }
         if (isPasswordMatch) {
           const { password, ...userData } = userDetail.get();
           const token = jwt.createToken(userData);
-          let userAccessToken = await token.then(e=>e);
+          let userAccessToken = await token.then(e => e);
           const deviceData = {
             userId: userData.id,
             deviceType,
             accessToken: userAccessToken
           };
           await this.addUpdateUserDevice(deviceData);
-          return token;
+          const sessionDetail = {
+            access_token: userAccessToken,
+            token_expire_time: config.jwtExpireIn
+          };
+          return sessionDetail;
         };
         return false;
-
       }
     } catch (error) {
       console.log(error);
-
     }
   },
   /**
@@ -107,7 +108,7 @@ export default {
       const userDeviceToken = await this.getUserDeviceToken(data.userId);
       const { userId, deviceType, accessToken } =
         data;
-      
+
       if (userDeviceToken) {
         const newData = {
           accessToken,
@@ -157,22 +158,22 @@ export default {
     }
   },
 
-    /**
-   * Add user device
-   * @param {Object} data
-   */
-    async addUserDevice(data) {
-      try {
-        return await userToken.create(data);
-      } catch (error) {
-        throw Error(error);
-      }
-    },
+  /**
+ * Add user device
+ * @param {Object} data
+ */
+  async addUserDevice(data) {
+    try {
+      return await userToken.create(data);
+    } catch (error) {
+      throw Error(error);
+    }
+  },
 
-    /**
-   * Get device etail by token
-   * @param {String} token
-   */
+  /**
+ * Get device etail by token
+ * @param {String} token
+ */
   async getDeviceDetailByToken(token) {
     try {
       const where = {

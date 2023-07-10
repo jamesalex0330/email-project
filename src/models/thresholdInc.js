@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-  const thresoldInc = sequelize.define(
-    "thresoldInc",
+  const thresholdInc = sequelize.define(
+    "thresholdInc",
     {
       masterIncId: {
         type: DataTypes.INTEGER,
@@ -62,12 +62,12 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true
     }
   );
-  thresoldInc.associate = function (models) {
-    thresoldInc.belongsTo(models.masterInc, {
+  thresholdInc.associate = function (models) {
+    thresholdInc.belongsTo(models.masterInc, {
       foreignKey: "masterIncId",
       onDelete: "cascade",
       onUpdate: "cascade",
     });   
   };
-  return thresoldInc;
+  return thresholdInc;
 };

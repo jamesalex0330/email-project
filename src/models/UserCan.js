@@ -34,7 +34,31 @@ module.exports = (sequelize, DataTypes) => {
       },
       docProof: {
         type: DataTypes.STRING(255),
-      }      
+      },      
+      secondHolderPan: {
+        type: DataTypes.STRING(255),
+      },      
+      secondHolderKraStatus: {
+        type: DataTypes.STRING(255),
+      },      
+      thirdHolderPan: {
+        type: DataTypes.STRING(255),
+      },         
+      thirdHolderKraStatus: {
+        type: DataTypes.STRING(255),
+      },      
+      guardianPan: {
+        type: DataTypes.STRING(255),
+      },      
+      guardianKraStatus: {
+        type: DataTypes.STRING(255),
+      },      
+      remarks: {
+        type: DataTypes.STRING(255),
+      },      
+      rejectReason: {
+        type: DataTypes.STRING(255),
+      }     
     }, {
       underscored: true,
       indexes: [

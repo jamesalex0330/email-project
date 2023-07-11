@@ -25,7 +25,7 @@ export default {
                         console.log(messageId, "messageId");
                         console.log(getSubject, "getSubject");
                         if (getSubject && messageDetails.payload.parts) {
-                            await this.getAttachmentData(messageDetails.payload.parts, email, messageId, getSubject,subject)
+                            await this.getAttachmentData(messageDetails.payload.parts, email, messageId, getSubject, subject)
                         } else {
                             await gmailService.markAsRead(email, messageId);
                         }
@@ -39,7 +39,7 @@ export default {
         }
     },
 
-    async getAttachmentData(messageDetails, email, messageId, getSubject,subject) {
+    async getAttachmentData(messageDetails, email, messageId, getSubject, subject) {
         const transaction = await models.sequelize.transaction();
         try {
 
@@ -187,7 +187,15 @@ export default {
                             firstHolderName: row['First Holder Name'],
                             firstHolderKraStatus: row['First Holder KRA Status'],
                             eventRemark: row['Event Remarks'],
-                            docProof: row['DOC PROOF']
+                            docProof: row['DOC PROOF'],
+                            secondHolderPan: row['Second Holder PAN'],
+                            secondHolderKraStatus: row['Second Holder KRA status'],
+                            thirdHolderPan: row['Third holder PAN'],
+                            thirdHolderKraStatus: row['Third Holder KRA status'],
+                            guardianPan: row['Guardian PAN'],
+                            guardianKraStatus: row['Guardian KRA status'],
+                            remarks: row['Remarks'],
+                            rejectReason: row['RejectReason'],
                         }
 
                         subjectType = subject

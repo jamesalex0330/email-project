@@ -123,7 +123,7 @@ export default {
                             });
 
                             if (userCanData) {
-                                let userData = await User.findOne({
+                                let userData = await user.findOne({
                                     where: { panCard: userCanData.firstHolderPan }
                                 });
 

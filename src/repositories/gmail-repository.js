@@ -12,22 +12,25 @@ export default {
         try {
             let email = process.env.EMAIL;
             let messageList = await gmailService.messageList(email);
-            if (messageList.messages) {
+            if (messageList?.messages) {
                 let messages = messageList.messages;
                 for await (const message of messages) {
                     let messageId = message.id;
                     let messageDetails = await gmailService.readMail(email, messageId);
                     if (messageDetails) {
-                        let headerArray = messageDetails.payload.headers;
-                        let arrayData = headerArray.find(item => item.name.toLowerCase() === "subject");
-                        let subject = arrayData['value'].toLowerCase();
-                        var getSubject = this.getSubject(subject);
-                        console.log(messageId, "messageId");
-                        console.log(getSubject, "getSubject");
-                        if (getSubject && messageDetails.payload.parts) {
-                            await this.getAttachmentData(messageDetails.payload.parts, email, messageId, getSubject, subject)
-                        } else {
-                            await gmailService.markAsRead(email, messageId);
+                        if (messageDetails?.payload?.headers) {
+                            let headerArray = messageDetails?.payload?.headers;
+                            let arrayData = headerArray.find(item => item.name.toLowerCase() === "subject");
+                            let subject = arrayData['value'].toLowerCase();
+                            var getSubject = this.getSubject(subject);
+                            console.log(messageId, "messageId");
+                            console.log(getSubject, "getSubject");
+                            if (getSubject && messageDetails?.payload?.parts) {
+                                await this.getAttachmentData(messageDetails.payload.parts, email, messageId, getSubject, subject)
+                            } else {
+                                await gmailService.markAsRead(email, messageId);
+                            }
+
                         }
                     }
                 }
@@ -46,7 +49,7 @@ export default {
             var checkMessageExist = await readMail.findOne({ where: { messageId: messageId } });
             if (!checkMessageExist) {
                 for await (const mailPart of messageDetails) {
-                    if (mailPart.body.attachmentId) {
+                    if (mailPart?.body?.attachmentId) {
                         let attachmentId = mailPart.body.attachmentId;
                         let result = await gmailService.getAttachment(email, messageId, attachmentId);
                         var attachmentData = result.data;
@@ -80,8 +83,8 @@ export default {
                 await readMail.create({ 'messageId': messageId, 'subject': subject }, transaction);
                 await transaction.commit();
                 await gmailService.markAsRead(email, messageId);
-                return true;
             }
+            return true;
         } catch (error) {
             await transaction.rollback();
             throw Error(error);

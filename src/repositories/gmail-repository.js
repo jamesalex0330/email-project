@@ -20,11 +20,9 @@ export default {
                     if (messageDetails) {
                         if (messageDetails?.payload?.headers) {
                             let headerArray = messageDetails?.payload?.headers;
-                            let arrayData = headerArray.find(item => item.name.toLowerCase() === "subject");
+                            let arrayData = headerArray.find(item => item?.name.toLowerCase() === "subject");
                             let subject = arrayData['value'].toLowerCase();
                             var getSubject = this.getSubject(subject);
-                            console.log(messageId, "messageId");
-                            console.log(getSubject, "getSubject");
                             if (getSubject && messageDetails?.payload?.parts) {
                                 await this.getAttachmentData(messageDetails.payload.parts, email, messageId, getSubject, subject)
                             } else {
@@ -56,6 +54,15 @@ export default {
                         if (attachmentData) {
                             let getFileName = (mailPart.filename).split('.');
                             let getFileExt = getFileName.slice(-1);
+                            
+                            let masterSubject = "MF Utility-Incremental Scheme".toLowerCase();
+                            let thresHoldSubject = "threshold".toLowerCase();
+                            let fileName = getFileName[0].toLowerCase();
+                            let isThresHold = null;
+                            if (getSubject == masterSubject && fileName && fileName.search(thresHoldSubject) >= 0) {
+                                isThresHold = thresHoldSubject;
+                            }
+
                             if (getFileExt == "zip") {
                                 var outputPathZip = path.join(__dirname, `../../Public/uploads/${Date.now()}-${getSubject}.zip`);
                                 const zipFileData = Buffer.from(attachmentData, 'base64');
@@ -76,7 +83,7 @@ export default {
                                 const fileData = Buffer.from(attachmentData, 'base64');
                                 fs.writeFileSync(outputPath, Buffer.from(fileData));
                             }
-                            await this.importEmailData(outputPath, getSubject, transaction);
+                            await this.importEmailData(outputPath, getSubject, transaction, isThresHold);
                         }
                     }
                 }
@@ -90,13 +97,13 @@ export default {
             throw Error(error);
         }
     },
-    async importEmailData(File, subject, transaction) {
+    async importEmailData(File, subject, transaction, isThresHold = null) {
         try {
             let transactionSubject = "Transaction Response Feed".toLowerCase();
             let canSubject = "CAN Registration Feed".toLowerCase();
             let CDSSubject = "Daily CDS Feed".toLowerCase();
             let masterSubject = "MF Utility-Incremental Scheme".toLowerCase();
-            let thersoldSubject = "thersold".toLowerCase();
+            let thresHoldSubject = "threshold".toLowerCase();
             const workbook = xlsx.readFile(File, { cellDates: true });
             const sheetNames = workbook.SheetNames;
             const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetNames[0]]);
@@ -204,7 +211,7 @@ export default {
                         subjectType = subject
                         dataArray.push(bodyData);
                         // await UserCan.create(bodyData, { transaction: transaction });
-                    } else if (subject === masterSubject) {
+                    } else if (subject === masterSubject && isThresHold != "threshold") {
 
                         var allotDate = '';
                         var reopenDate = '';
@@ -274,7 +281,7 @@ export default {
                         dataArray.push(bodyData);
                         // await MasterInc.create(bodyData, { transaction: transaction });
 
-                    } else if (subject === thersoldSubject) {
+                    } else if (subject === masterSubject && isThresHold == "threshold") {
                         var startDate = '';
                         var endDate = '';
 
@@ -289,12 +296,12 @@ export default {
                         }
 
 
-                        let thersold = await thresholdInc.findOne({
-                            where: { schemeCode: row['scheme_code'], fundCode: row['fund_code'] }
+                        let threshold = await thresholdInc.findOne({
+                            where: { schemeCode: row['scheme_code'].toString(), fundCode: row['fund_code'].toString() }
                         });
                         var masterIncId = null;
-                        if (thersold) {
-                            masterIncId = thersold.id;
+                        if (threshold) {
+                            masterIncId = threshold.id;
                         }
 
                         bodyData = {
@@ -352,9 +359,9 @@ export default {
                 await userLead.bulkCreate(dataArray, { transaction: transaction });
             } else if (subjectType === canSubject) {
                 await userCan.bulkCreate(dataArray, { transaction: transaction });
-            } else if (subjectType === masterSubject) {
+            } else if (subjectType === masterSubject && isThresHold != "threshold") {
                 await masterInc.bulkCreate(dataArray, { transaction: transaction });
-            } else if (subjectType === thersoldSubject) {
+            } else if (subjectType === masterSubject && isThresHold == "threshold") {
                 await thresholdInc.bulkCreate(dataArray, { transaction: transaction });
             } else if (subjectType === CDSSubject) {
                 await cdsHold.bulkCreate(dataArray, { transaction: transaction });
@@ -376,7 +383,7 @@ export default {
         let canSubject = "CAN Registration Feed".toLowerCase();
         let CDSSubject = "Daily CDS Feed".toLowerCase();
         let masterSubject = "MF Utility-Incremental Scheme".toLowerCase();
-        let thersoldSubject = "thersold".toLowerCase();
+        let thresHoldSubject = "threshold".toLowerCase();
         if (subject.search(transactionSubject) >= 0) {
             returnData = transactionSubject;
         }
@@ -389,8 +396,8 @@ export default {
         if (subject.search(masterSubject) >= 0) {
             returnData = masterSubject;
         }
-        if (subject.search(thersoldSubject) >= 0) {
-            returnData = thersoldSubject;
+        if (subject.search(thresHoldSubject) >= 0) {
+            returnData = thresHoldSubject;
         }
         return returnData;
     }

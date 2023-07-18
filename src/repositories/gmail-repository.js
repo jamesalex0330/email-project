@@ -271,8 +271,8 @@ export default {
                             stpInAllowed: row['stp_in_allowed'],
                             swpAllowed: row['swp_allowed'],
                             dematAllowed: row['Demat_Allowed'],
-                            catgID: row['Catg ID'],
-                            subCatgID: row['Sub-Catg ID'],
+                            catgId: row['Catg ID'],
+                            subCatgId: row['Sub-Catg ID'],
                             schemeFlag: row['Scheme Flag']
 
                         }

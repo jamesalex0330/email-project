@@ -83,13 +83,13 @@ module.exports = (sequelize, DataTypes) => {
       dematAllowed: {
         type: DataTypes.STRING(255),
       },
-      catgID: {
+      catgId: {
         type: DataTypes.STRING(255),
       },
       schemeFlag: {
         type: DataTypes.STRING(255),
       },
-      subCatgID: {
+      subCatgId: {
         type: DataTypes.STRING(255),
       }
     }, {

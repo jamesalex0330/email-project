@@ -32,8 +32,9 @@ export default {
                         }
                     }
                 }
-                return messageList;
             }
+            return messageList;
+
         } catch (error) {
             console.log(error, "error");
             throw Error(error);
@@ -95,6 +96,8 @@ export default {
         } catch (error) {
             await transaction.rollback();
             throw Error(error);
+        } finally {
+            await transaction.cleanup();
         }
     },
     async importEmailData(File, subject, transaction, isThresHold = null) {

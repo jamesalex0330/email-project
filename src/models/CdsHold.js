@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(255),
       },
       navDate: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.DATE,
       }
 
     }, {

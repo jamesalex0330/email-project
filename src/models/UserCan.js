@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(255),
       },
       canRegDate: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.DATE,
       },
       canRegMode: {
         type: DataTypes.STRING(255),

@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
       "schemeMasterInc",
       {
         schemeCode: {
-          type: DataTypes.STRING(50),
+          type: DataTypes.STRING(100),
         },
         fundCode: {
           type: DataTypes.STRING(255),
@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.STRING(255),
         },
         schemeType: {
-          type: DataTypes.STRING(13),
+          type: DataTypes.STRING(100),
         },
         planType: {
           type: DataTypes.STRING(255),

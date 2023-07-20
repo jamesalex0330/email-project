@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING(255),
             },
             txnType: {
-                type: DataTypes.STRING(13),
+                type: DataTypes.STRING(255),
             },
             sysFreq: {
                 type: DataTypes.STRING(255),

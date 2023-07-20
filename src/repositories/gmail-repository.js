@@ -346,7 +346,7 @@ export default {
                         endDate = new Date(row['end_date']);
                         endDate = endDate.toISOString();
                     }
-                    let thresholdInc = await schemeThresholdInc.findOne({
+                    let thresholdInc = await schemeMasterInc.findOne({
                         where: { schemeCode: row['scheme_code'].toString(), fundCode: row['fund_code'].toString() }
                     });
                     var schemeMasterIncId = null;

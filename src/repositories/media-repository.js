@@ -1,5 +1,5 @@
 import models from "../models";
-const { userLead, userCan, user, masterInc, thresholdInc, cdsHold} = models;
+const { userLead, userCanRegistration, user, masterInc, thresholdInc, cdsHold} = models;
 import multer from "multer";
 import xlsx from 'xlsx';
 import path from 'path';
@@ -69,7 +69,7 @@ export default {
             orderTime = orderTimeDate.toDateString();
           }
           let userId = null;
-          let userCanData = await userCan.findOne({
+          let userCanData = await userCanRegistration.findOne({
             where: { CAN: index['CAN Number'] }
           });
 
@@ -139,7 +139,7 @@ export default {
             eventRemark: index['Event Remarks'],
             docProof: index['DOC PROOF']
           }
-          await userCan.create(bodyData);
+          await userCanRegistration.create(bodyData);
         });
         await Promise.all(insertResult);
       }  else if (params.mediaFor == "master") {

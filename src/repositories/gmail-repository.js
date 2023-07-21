@@ -6,7 +6,7 @@ import path from "path";
 const unZipper = require("unzipper");
 const fs = require('fs');
 const { Sequelize } = models.sequelize;
-const { txnResponseSystematicRsp, txnResponseTransactionRsp, userCan, user, schemeMasterInc, schemeThresholdInc, cdsHold, readMail } = models;
+const { txnResponseSystematicRsp, txnResponseTransactionRsp, userCanRegistration, user, schemeMasterInc, schemeThresholdInc, cdsHold, readMail } = models;
 export default {
     async getUnreadEmails() {
         try {
@@ -40,7 +40,7 @@ export default {
     },
     async getAttachmentData(messageDetails, email, messageId, getSubject, subject) {
         const transaction = await models.sequelize.transaction();
-        try {
+        // try {
         var checkMessageExist = await readMail.findOne({ where: { messageId: messageId } });
         if (!checkMessageExist) {
             for await (const mailPart of messageDetails) {
@@ -102,15 +102,15 @@ export default {
             console.log(messageId, "message already exist in DB.");
         }
         return true;
-        } catch (error) {
-            await transaction.rollback();
-            throw Error(error);
-        } finally {
-            await transaction.cleanup();
-        }
+        // } catch (error) {
+        //     await transaction.rollback();
+        //     throw Error(error);
+        // } finally {
+        //     await transaction.cleanup();
+        // }
     },
     async importEmailData(File, subject, transaction, isThresHold = null) {
-        try {
+        // try {
         let transactionSubject = "Transaction Response Feed".toLowerCase();
         let canSubject = "CAN Registration Feed".toLowerCase();
         let CDSSubject = "Daily CDS Feed".toLowerCase();
@@ -133,12 +133,11 @@ export default {
                 if (subject === transactionSubject && isThresHold == mfuSystematicRsp) {
                     let valueDate = null;
                     if (row['Value Date']) {
-                        let currentDate = new Date(row['Value Date']);
-                        valueDate = currentDate.toISOString();
+                        valueDate = new Date(row['Value Date']).toISOString();
                     }
                     let userId = null;
                     if (row['CAN Number']) {
-                        let userCanData = await userCan.findOne({
+                        let userCanData = await userCanRegistration.findOne({
                             where: { can: row['CAN Number'] }
                         });
                         if (userCanData) {
@@ -174,19 +173,17 @@ export default {
                     subjectType = transactionSubject
                     dataArray.push(bodyData);
                 } else if (subject === transactionSubject && isThresHold == mfuTransactionRsp) {
-                    var valueDate = null;
+                    let valueDate = null;
                     if (row['Value Date']) {
-                        let currentDate = new Date(row['Value Date']);
-                        valueDate = currentDate.toISOString();
+                        valueDate = new Date(row['Value Date']).toISOString();
                     }
-                    var orderTimestamp = null;
+                    let orderTimestamp = null;
                     if (row['Order Timestamp']) {
-                        let orderTimeDate = new Date(row['Order Timestamp']);
-                        orderTimestamp = orderTimeDate.toISOString();
+                        orderTimestamp = new Date(row['Order Timestamp']).toISOString();
                     }
                     let userId = null;
                     if (row['CAN Number']) {
-                        let userCanData = await userCan.findOne({
+                        let userCanData = await userCanRegistration.findOne({
                             where: { can: row['CAN Number'] }
                         });
                         if (userCanData) {
@@ -197,6 +194,15 @@ export default {
                                 userId = userData.id;
                             }
                         }
+                    }
+                    let startDate = null;
+                    let endDate = null;
+                    
+                    if (row['start_date']) {
+                        startDate = new Date(row['start_date']).toISOString();
+                    }
+                    if (row['start_date']) {
+                        endDate = new Date(row['End Date']).toISOString();
                     }
                     bodyData = {
                         userId: userId,
@@ -234,8 +240,8 @@ export default {
                         frequency: row['Frequency'],
                         instalmentDay: row['Instalment Day'],
                         numberofInstallments: row['Number of Installments'],
-                        startDate: row['Start Date'],
-                        endDate: row['End Date'],
+                        startDate: startDate,
+                        endDate: endDate,
                         originalOrderNumber: row['Original Order Number'],
                         currentInstalmentNumber: row['Current Instalment Number'],
                         transactionStatus: row['Transaction Status'],
@@ -252,16 +258,15 @@ export default {
                     subjectType = transactionSubject
                     dataArray.push(bodyData);
                 } else if (subject === canSubject) {
-                    var formd = null;
+                    let canRegDate = null;
                     if (row['CAN Reg Date']) {
-                        let currentDate = new Date(row['CAN Reg Date']);
-                        formd = currentDate.toISOString();
+                        canRegDate = new Date(row['CAN Reg Date']).toISOString();
                     }
                     bodyData = {
                         arnCode: row['ARN/RIA Code'],
                         EUIN: row['EUIN'],
                         can: row['CAN'],
-                        canRegDate: formd,
+                        canRegDate: canRegDate,
                         canRegMode: row['CAN Reg Mode'],
                         canStatus: row['CAN Status'],
                         firstHolderPan: row['First Holder PAN'],
@@ -281,11 +286,11 @@ export default {
                     subjectType = subject
                     dataArray.push(bodyData);
                 } else if (subject === masterSubject && isThresHold == schemeMasterIncFile) {
-                    var allotDate = null;
-                    var reopenDate = null;
-                    var maturityDate = null;
-                    var nfoStart = null;
-                    var nfoEnd = null;
+                    let allotDate = null;
+                    let reopenDate = null;
+                    let maturityDate = null;
+                    let nfoStart = null;
+                    let nfoEnd = null;
                     if (row['allot_date']) {
                         allotDate = new Date(row['allot_date']).toISOString();
                     }
@@ -336,20 +341,18 @@ export default {
                     subjectType = subject
                     dataArray.push(bodyData);
                 } else if (subject === masterSubject && isThresHold == schemeThresholdIncFile) {
-                    var startDate = null;
-                    var endDate = null;
+                    let startDate = null;
+                    let endDate = null;
                     if (row['start_date']) {
-                        startDate = new Date(row['start_date']);
-                        startDate = startDate.toISOString();
+                        startDate = new Date(row['start_date']).toISOString();
                     }
                     if (row['end_date']) {
-                        endDate = new Date(row['end_date']);
-                        endDate = endDate.toISOString();
+                        endDate = new Date(row['end_date']).toISOString();
                     }
                     let thresholdInc = await schemeMasterInc.findOne({
                         where: { schemeCode: row['scheme_code'].toString(), fundCode: row['fund_code'].toString() }
                     });
-                    var schemeMasterIncId = null;
+                    let schemeMasterIncId = null;
                     if (thresholdInc) {
                         schemeMasterIncId = thresholdInc.id;
                     }
@@ -376,10 +379,9 @@ export default {
                     subjectType = subject
                     dataArray.push(bodyData);
                 } else if (subject === CDSSubject) {
-                    var navDate = null;
+                    let navDate = null;
                     if (row['NAV Date']) {
-                        navDate = new Date(row['NAV Date']);
-                        navDate = navDate.toISOString();
+                        navDate = new Date(row['NAV Date']).toISOString();
                     }
                     bodyData = {
                         can: row['CAN'],
@@ -406,7 +408,7 @@ export default {
         } else if (subjectType === transactionSubject && isThresHold == mfuTransactionRsp) {
             await txnResponseTransactionRsp.bulkCreate(dataArray, { transaction: transaction });
         } else if (subjectType === canSubject) {
-            await userCan.bulkCreate(dataArray, { transaction: transaction });
+            await userCanRegistration.bulkCreate(dataArray, { transaction: transaction });
         } else if (subjectType === masterSubject && isThresHold == schemeMasterIncFile) {
             await schemeMasterInc.bulkCreate(dataArray, { transaction: transaction });
         } else if (subjectType === masterSubject && isThresHold == schemeThresholdIncFile) {
@@ -420,9 +422,9 @@ export default {
             }
         });
         return true;
-        } catch (error) {
-            throw Error(error);
-        }
+        // } catch (error) {
+        //     throw Error(error);
+        // }
     },
     getSubject(subject) {
         let returnData = null;

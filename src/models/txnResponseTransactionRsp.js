@@ -139,7 +139,7 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.DATE,
             },
             rtaRemarks: {
-                type: DataTypes.DATE,
+                type: DataTypes.STRING(255),
             },
             addlColumnOne: {
                 type: DataTypes.STRING(255),

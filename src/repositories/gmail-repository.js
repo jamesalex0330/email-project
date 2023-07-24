@@ -40,7 +40,7 @@ export default {
     },
     async getAttachmentData(messageDetails, email, messageId, getSubject, subject) {
         const transaction = await models.sequelize.transaction();
-        // try {
+        try {
         var checkMessageExist = await readMail.findOne({ where: { messageId: messageId } });
         if (!checkMessageExist) {
             for await (const mailPart of messageDetails) {
@@ -99,18 +99,19 @@ export default {
             await transaction.commit();
             await gmailService.markAsRead(email, messageId);
         } else {
+            await gmailService.markAsRead(email, messageId);
             console.log(messageId, "message already exist in DB.");
         }
         return true;
-        // } catch (error) {
-        //     await transaction.rollback();
-        //     throw Error(error);
-        // } finally {
-        //     await transaction.cleanup();
-        // }
+        } catch (error) {
+            await transaction.rollback();
+            throw Error(error);
+        } finally {
+            await transaction.cleanup();
+        }
     },
     async importEmailData(File, subject, transaction, isThresHold = null) {
-        // try {
+        try {
         let transactionSubject = "Transaction Response Feed".toLowerCase();
         let canSubject = "CAN Registration Feed".toLowerCase();
         let CDSSubject = "Daily CDS Feed".toLowerCase();
@@ -422,9 +423,9 @@ export default {
             }
         });
         return true;
-        // } catch (error) {
-        //     throw Error(error);
-        // }
+        } catch (error) {
+            throw Error(error);
+        }
     },
     getSubject(subject) {
         let returnData = null;

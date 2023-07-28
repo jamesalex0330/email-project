@@ -5,7 +5,7 @@ import config from "../config";
 import jwt from "../services/jwt";
 import httpStatus from "http-status";
 const { Sequelize } = models.sequelize;
-const { user, cdsHold, userLead } = models
+const { user, cdsHold, txnResponseTransactionRsp } = models
 export default {
 
   async dashboard(req, t) {
@@ -15,7 +15,7 @@ export default {
       const queryData = query;
       let userId = req.user.id;
       let investedData = {};
-      const leadData = await userLead.findOne(
+      const leadData = await txnResponseTransactionRsp.findOne(
         {
           where: { userId: userId },
           attributes: {
@@ -45,6 +45,7 @@ export default {
       if(leadData?.canNumber){
         canNumber = leadData?.canNumber;
       }
+      console.log(canNumber,"canNumber");
       let fundData = await cdsHold.findAll(
         {
           attributes: {

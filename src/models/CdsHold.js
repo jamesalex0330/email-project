@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(255),
       },
       currentValue: {
-        type: DataTypes.NUMERIC(17,8),
+        type: DataTypes.NUMERIC(17,2),
       },
       nav: {
         type: DataTypes.STRING(255),

@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
       "schemeMasterInc",
       {
         schemeCode: {
-          type: DataTypes.STRING(100),
+          type: DataTypes.STRING(50),
         },
         fundCode: {
           type: DataTypes.STRING(255),
@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.STRING(255),
         },
         schemeType: {
-          type: DataTypes.STRING(100),
+          type: DataTypes.STRING(13),
         },
         planType: {
           type: DataTypes.STRING(255),
@@ -33,10 +33,10 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.STRING(255),
         },      
         nfoStart: {
-          type: DataTypes.STRING(255),
+          type: DataTypes.DATE,
         },
         nfoEnd: {
-          type: DataTypes.STRING(255),
+          type: DataTypes.DATE,
         },
         allotDate: {
           type: DataTypes.DATE,
@@ -46,7 +46,6 @@ module.exports = (sequelize, DataTypes) => {
         },
         maturityDate: {
           type: DataTypes.DATE,
-          defaultValue: null
         },
         entryLoad: {
           type: DataTypes.TEXT(),

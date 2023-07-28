@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-  const userCanRegistration = sequelize.define(
-    "userCanRegistration",
+  const userCan = sequelize.define(
+    "userCan",
     {
       arnCode: {
         type: DataTypes.STRING(255),
@@ -68,5 +68,5 @@ module.exports = (sequelize, DataTypes) => {
       ]
     }
   );
-  return userCanRegistration;
+  return userCan;
 };

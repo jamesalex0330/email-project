@@ -25,31 +25,31 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING(255),
             },
             minAmt: {
-                type: DataTypes.FLOAT,
+                type: DataTypes.DECIMAL(17,2),
             },
             maxAmt: {
-                type: DataTypes.FLOAT,
+                type: DataTypes.DECIMAL(17,2),
             },
             multipleAmt: {
-                type: DataTypes.FLOAT,
+                type: DataTypes.DECIMAL(17,2),
             },
             minUnits: {
-                type: DataTypes.FLOAT,
+                type: DataTypes.DECIMAL(17,2),
             },
             multipleUnits: {
-                type: DataTypes.FLOAT,
+                type: DataTypes.DECIMAL(17,2),
             },
             minInst: {
-                type: DataTypes.FLOAT,
+                type: DataTypes.DECIMAL(17,2),
             },
             maxInst: {
-                type: DataTypes.FLOAT,
+                type: DataTypes.DECIMAL(17,2),
             },
             sysPerpetual: {
-                type: DataTypes.FLOAT,
+                type: DataTypes.STRING(255),
             },
             minCumAmt: {
-                type: DataTypes.FLOAT,
+                type: DataTypes.DECIMAL(17,2),
             },
             startDate: {
                 type: DataTypes.DATE,

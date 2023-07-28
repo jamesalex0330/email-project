@@ -37,19 +37,19 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.STRING(100),
         },
         price: {
-          type: DataTypes.FLOAT,
+          type: DataTypes.DECIMAL(17,2),
         },
         responseAmount: {
-          type: DataTypes.FLOAT,
+          type: DataTypes.DECIMAL(17,2),
         },
         responseUnits: {
-          type: DataTypes.FLOAT,
+          type: DataTypes.DECIMAL(17,2),
         },
         valueDate: {
           type: DataTypes.DATE,
         },
         rtaRemarks: {
-          type: DataTypes.DATE,
+          type: DataTypes.STRING(100),
         },
         addlColumnOne: {
           type: DataTypes.STRING(100),

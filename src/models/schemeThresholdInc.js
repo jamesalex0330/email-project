@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING(255),
             },
             txnType: {
-                type: DataTypes.STRING(255),
+                type: DataTypes.STRING(13),
             },
             sysFreq: {
                 type: DataTypes.STRING(255),
@@ -25,31 +25,31 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING(255),
             },
             minAmt: {
-                type: DataTypes.STRING(255),
+                type: DataTypes.FLOAT,
             },
             maxAmt: {
-                type: DataTypes.STRING(255),
+                type: DataTypes.FLOAT,
             },
             multipleAmt: {
-                type: DataTypes.STRING(255),
+                type: DataTypes.FLOAT,
             },
             minUnits: {
-                type: DataTypes.STRING(255),
+                type: DataTypes.FLOAT,
             },
             multipleUnits: {
-                type: DataTypes.STRING(255),
+                type: DataTypes.FLOAT,
             },
             minInst: {
-                type: DataTypes.STRING(255),
+                type: DataTypes.FLOAT,
             },
             maxInst: {
-                type: DataTypes.STRING(255),
+                type: DataTypes.FLOAT,
             },
             sysPerpetual: {
-                type: DataTypes.STRING(255),
+                type: DataTypes.FLOAT,
             },
             minCumAmt: {
-                type: DataTypes.STRING(255),
+                type: DataTypes.FLOAT,
             },
             startDate: {
                 type: DataTypes.DATE,

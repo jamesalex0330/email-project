@@ -149,7 +149,7 @@ export default class Bootstrap {
             console.log('Server has started on port %d', port);
         });
         // delete unused media from media temp
-      //  this.scheduleJob();
+       this.scheduleJob();
     }
 
     /**

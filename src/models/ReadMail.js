@@ -8,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
             subject: {
                 type: DataTypes.TEXT
             },
+            mail_error: {
+                type: DataTypes.TEXT,
+                allowNull:true
+            },
         },
         {
             underscored: true

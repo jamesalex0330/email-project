@@ -7,106 +7,106 @@ module.exports = (sequelize, DataTypes) => {
                 defaultValue: null
             },
             orderNumber: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             orderSequenceNumber: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             transactionTypeCode: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             utrn: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             canNumber: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             FolioNumber: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             primaryHolderName: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             orderMode: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             ApplicationNumber: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             orderTimestamp: {
                 type: DataTypes.DATE,
             },
             fundCode: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             fundName: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.TEXT(),
             },
             rtaSchemeCode: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             rtaSchemeName: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.TEXT(),
             },
             reInvestmentTag: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             riaCode: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             arnCode: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             subBrokerCode: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             euinCode: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             rmCode: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             withdrawalOption: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             amount: {
                 type: DataTypes.DECIMAL(17, 2),
             },
             units: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             paymentMode: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             bankName: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             bankAccountNo: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             paymentReferenceNo: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             paymentStatus: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             subseqPaymentBankName: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             subseqPaymentAccountNo: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             subseqPaymentReferenceNo: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             frequency: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             instalmentDay: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             numberofInstallments: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             startDate: {
                 type: DataTypes.DATE,
@@ -115,16 +115,16 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.DATE,
             },
             originalOrderNumber: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             currentInstalmentNumber: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             transactionStatus: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             registrationStatus: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(255),
             },
             price: {
                 type: DataTypes.DECIMAL(17,2),
@@ -139,16 +139,16 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.DATE,
             },
             rtaRemarks: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.TEXT(),
             },
             addlColumnOne: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.TEXT(),
             },
             addlColumnTwo: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.TEXT(),
             },
             addlColumnThree: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.TEXT(),
             }
         }, {
         indexes: [

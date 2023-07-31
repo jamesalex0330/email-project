@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(13),
       },
       fundName: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.TEXT(),
       },
       schemeCode: {
         type: DataTypes.STRING(255),

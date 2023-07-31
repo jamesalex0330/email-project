@@ -54,10 +54,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(255),
       },      
       remarks: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.TEXT(),
       },      
       rejectReason: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.TEXT(),
       }     
     }, {
       underscored: true,

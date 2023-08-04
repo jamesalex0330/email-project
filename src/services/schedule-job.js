@@ -34,6 +34,7 @@ export default {
         try {
             console.log("Triggered");
             await gmailRepository.getUnreadEmails();
+            console.log("Triggered End");
         } catch (error) {
             errorLogger.error(JSON.stringify(error));
         }

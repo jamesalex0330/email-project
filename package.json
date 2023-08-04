@@ -6,6 +6,7 @@
   "scripts": {
     "test": "nodemon --exec babel-node src/scheduler.js",
     "start": "nodemon --exec babel-node src/index.js",
+    "scheduler": "nodemon --exec babel-node src/scheduler.js",
     "clean": "rm -rf email-node-api",
     "build": "npm run clean && babel src --out-dir lib --copy-files -d email-node-api",
     "serve": "node email-node-api/index.js",

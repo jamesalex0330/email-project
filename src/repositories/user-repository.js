@@ -5,7 +5,7 @@ import config from "../config";
 import jwt from "../services/jwt";
 import httpStatus from "http-status";
 const { Sequelize } = models.sequelize;
-const { user, cdsHold, txnResponseTransactionRsp } = models
+const { user, cdsHold, txnResponseTransactionRsp, userCanRegistration } = models
 export default {
 
   async dashboard(req, t) {
@@ -14,10 +14,27 @@ export default {
       const { query } = req;
       const queryData = query;
       let userId = req.user.id;
+
+      let userData = await user.findOne({
+        where: { id: userId }
+      });
+
+      let userCanData = await userCanRegistration.findOne({
+        where: { firstHolderPan: userData.panCard }
+      });
+      
       let investedData = {};
+      let leadWhere = {};
+      leadWhere.canNumber = userCanData.can;
+      leadWhere.folio_number = { [Op.ne]: null };
+      leadWhere.utrn = { [Op.in]: 0 };
+      leadWhere.payment_status = { [Op.in]: ['CR', 'IR', 'DG', 'DA', 'PC', 'PD'] };
+      leadWhere.transaction_status = { [Op.in]: ['OA', 'RA', 'RP'] };
+      leadWhere.transaction_type_code = { [Op.in]: ['A', 'B', 'N', 'V'] };
+
       const leadData = await txnResponseTransactionRsp.findOne(
         {
-          where: { userId: userId },
+          where: leadWhere,
           attributes: {
             include: [
               [Sequelize.fn('ROUND', Sequelize.fn('SUM', Sequelize.col('amount')), 2), 'sum_amount']
@@ -27,7 +44,7 @@ export default {
           raw: true
         }
       );
-      
+
       const csdData = await cdsHold.findOne(
         {
           attributes: {
@@ -41,11 +58,7 @@ export default {
       );
       investedData.invested = leadData?.sum_amount;
       investedData.current = csdData.currentValue;
-      let canNumber = null;
-      if(leadData?.canNumber){
-        canNumber = leadData?.canNumber;
-      }
-      console.log(canNumber,"canNumber");
+      let canNumber = userCanData.can;
       let fundData = await cdsHold.findAll(
         {
           attributes: {

@@ -70,10 +70,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING(255),
             },
             amount: {
-                type: DataTypes.DECIMAL(17, 2),
+                type: DataTypes.DECIMAL(17, 4),
             },
             units: {
-                type: DataTypes.STRING(255),
+                type: DataTypes.DECIMAL(17, 4),
             },
             paymentMode: {
                 type: DataTypes.STRING(255),
@@ -105,8 +105,8 @@ module.exports = (sequelize, DataTypes) => {
             instalmentDay: {
                 type: DataTypes.STRING(255),
             },
-            numberofInstallments: {
-                type: DataTypes.STRING(255),
+            numberOfInstallments: {
+                type: DataTypes.BIGINT(),
             },
             startDate: {
                 type: DataTypes.DATE,
@@ -117,8 +117,8 @@ module.exports = (sequelize, DataTypes) => {
             originalOrderNumber: {
                 type: DataTypes.STRING(255),
             },
-            currentInstalmentNumber: {
-                type: DataTypes.STRING(255),
+            currentInstallmentNumber: {
+                type: DataTypes.BIGINT(),
             },
             transactionStatus: {
                 type: DataTypes.STRING(255),

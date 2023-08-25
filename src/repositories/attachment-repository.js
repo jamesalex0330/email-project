@@ -47,7 +47,7 @@ export default {
           units : index['Units'],
           frequency : index['Frequency'],
           instalmentDay : index['Instalment Day'],
-          numberofInstallments : index['Number of Installments'],
+          numberOfInstallments : index['Number of Installments'],
           startDate : index['Start Date'],
           endDate : index['End Date'],
           originalOrderNumber : index['Original Order Number'],

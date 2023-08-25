@@ -40,10 +40,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.DECIMAL(17,4),
             },
             minInst: {
-                type: DataTypes.DECIMAL(17,4),
+                type: DataTypes.BIGINT(),
             },
             maxInst: {
-                type: DataTypes.DECIMAL(17,4),
+                type: DataTypes.BIGINT(),
             },
             sysPerpetual: {
                 type: DataTypes.STRING(255),

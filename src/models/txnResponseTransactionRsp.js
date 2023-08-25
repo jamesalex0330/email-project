@@ -127,13 +127,13 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING(255),
             },
             price: {
-                type: DataTypes.DECIMAL(17,2),
+                type: DataTypes.DECIMAL(17,4),
             },
             responseAmount: {
-                type: DataTypes.DECIMAL(17,2),
+                type: DataTypes.DECIMAL(17,4),
             },
             responseUnits: {
-                type: DataTypes.DECIMAL(17,2),
+                type: DataTypes.DECIMAL(17,4),
             },
             valueDate: {
                 type: DataTypes.DATE,

@@ -46,7 +46,7 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.DECIMAL(17,4),
         },
         valueDate: {
-          type: DataTypes.DATE,
+          type: DataTypes.DATEONLY,
         },
         rtaRemarks: {
           type: DataTypes.STRING(255),

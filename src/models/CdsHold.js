@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.NUMERIC(17,4),
       },
       navDate: {
-        type: DataTypes.DATE,
+        type: DataTypes.DATEONLY,
       }
 
     }, {

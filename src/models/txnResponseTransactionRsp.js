@@ -34,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING(255),
             },
             orderTimestamp: {
-                type: DataTypes.DATE,
+                type: DataTypes.DATEONLY,
             },
             fundCode: {
                 type: DataTypes.STRING(255),
@@ -109,10 +109,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.BIGINT(),
             },
             startDate: {
-                type: DataTypes.DATE,
+                type: DataTypes.DATEONLY,
             },
             endDate: {
-                type: DataTypes.DATE,
+                type: DataTypes.DATEONLY,
             },
             originalOrderNumber: {
                 type: DataTypes.STRING(255),
@@ -136,7 +136,7 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.DECIMAL(17,4),
             },
             valueDate: {
-                type: DataTypes.DATE,
+                type: DataTypes.DATEONLY,
             },
             rtaRemarks: {
                 type: DataTypes.TEXT(),

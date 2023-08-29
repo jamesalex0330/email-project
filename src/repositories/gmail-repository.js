@@ -137,7 +137,6 @@ export default {
                         let valueDate = null;
                         if (row['Value Date']) {
                             valueDate = new Date(row['Value Date']).toISOString();
-                            valueDate = valueDate.substring(0, 10);
                         }
                         let userId = null;
                         if (row['CAN Number']) {
@@ -180,12 +179,10 @@ export default {
                         let valueDate = null;
                         if (row['Value Date']) {
                             valueDate = new Date(row['Value Date']).toISOString();
-                            valueDate = valueDate.substring(0, 10);
                         }
                         let orderTimestamp = null;
                         if (row['Order Timestamp']) {
                             orderTimestamp = new Date(row['Order Timestamp']).toISOString();
-                            orderTimestamp = orderTimestamp.substring(0, 10);
                         }
                         let userId = null;
                         if (row['CAN Number']) {
@@ -206,11 +203,9 @@ export default {
 
                         if (row['start_date']) {
                             startDate = new Date(row['start_date']).toISOString();
-                            startDate = startDate.substring(0, 10);
                         }
                         if (row['start_date']) {
                             endDate = new Date(row['End Date']).toISOString();
-                            endDate = endDate.substring(0, 10);
                         }
                         bodyData = {
                             userId: userId,
@@ -269,7 +264,6 @@ export default {
                         let canRegDate = null;
                         if (row['CAN Reg Date']) {
                             canRegDate = new Date(row['CAN Reg Date']).toISOString();
-                            canRegDate = canRegDate.substring(0, 10);
                         }
                         bodyData = {
                             arnCode: row['ARN/RIA Code'],
@@ -302,23 +296,18 @@ export default {
                         let nfoEnd = null;
                         if (row['allot_date']) {
                             allotDate = new Date(row['allot_date']).toISOString();
-                            allotDate = allotDate.substring(0, 10);
                         }
                         if (row['reopen_date']) {
                             reopenDate = new Date(row['reopen_date']).toISOString();
-                            reopenDate = reopenDate.substring(0, 10);
                         }
                         if (row['maturity_date']) {
                             maturityDate = new Date(row['maturity_date']).toISOString();
-                            maturityDate = maturityDate.substring(0, 10);
                         }
                         if (row['nfo_start']) {
                             nfoStart = new Date(row['nfo_start']).toISOString();
-                            nfoStart = nfoStart.substring(0, 10);
                         }
                         if (row['nfo_end']) {
                             nfoEnd = new Date(row['nfo_end']).toISOString();
-                            nfoEnd = nfoEnd.substring(0, 10);
                         }
                         bodyData = {
                             schemeCode: row['scheme_code'],
@@ -359,11 +348,9 @@ export default {
                         let endDate = null;
                         if (row['start_date']) {
                             startDate = new Date(row['start_date']).toISOString();
-                            startDate = startDate.substring(0, 10);
                         }
                         if (row['end_date']) {
                             endDate = new Date(row['end_date']).toISOString();
-                            endDate = endDate.substring(0, 10);
                         }
                         let thresholdInc = await schemeMasterInc.findOne({
                             where: { schemeCode: row['scheme_code'].toString(), fundCode: row['fund_code'].toString() }
@@ -398,7 +385,6 @@ export default {
                         let navDate = null;
                         if (row['NAV Date']) {
                             navDate = new Date(row['NAV Date']).toISOString();
-                            navDate = navDate.substring(0, 10);
                         }
                         bodyData = {
                             can: row['CAN'],

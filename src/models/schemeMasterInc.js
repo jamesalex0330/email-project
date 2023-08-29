@@ -33,19 +33,19 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.STRING(255),
         },      
         nfoStart: {
-          type: DataTypes.DATE,
+          type: DataTypes.DATEONLY,
         },
         nfoEnd: {
-          type: DataTypes.DATE,
+          type: DataTypes.DATEONLY,
         },
         allotDate: {
-          type: DataTypes.DATE,
+          type: DataTypes.DATEONLY,
         },
         reopenDate: {
-          type: DataTypes.DATE,
+          type: DataTypes.DATEONLY,
         },
         maturityDate: {
-          type: DataTypes.DATE,
+          type: DataTypes.DATEONLY,
         },
         entryLoad: {
           type: DataTypes.TEXT(),

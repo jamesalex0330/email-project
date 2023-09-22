@@ -5,7 +5,6 @@ import gmailService from "../services/gmail";
 import path from "path";
 const unZipper = require("unzipper");
 const fs = require('fs');
-const date = require('date-and-time');
 const { Sequelize } = models.sequelize;
 const { txnResponseSystematicRsp, txnResponseTransactionRsp, userCanRegistration, user, schemeMasterInc, schemeThresholdInc, cdsHold, readMail } = models;
 export default {
@@ -137,8 +136,7 @@ export default {
                     if (subject === transactionSubject && isThresHold == mfuSystematicRsp) {
                         let valueDate = null;
                         if (row['Value Date']) {
-                            valueDate = new Date(row['Value Date']);
-                            valueDate = date.format(valueDate,'YYYY-MM-DD HH:mm:ss');
+                            valueDate = new Date(row['Value Date']).toISOString();
                         }
                         let userId = null;
                         if (row['CAN Number']) {
@@ -180,13 +178,11 @@ export default {
                     } else if (subject === transactionSubject && isThresHold == mfuTransactionRsp) {
                         let valueDate = null;
                         if (row['Value Date']) {
-                            valueDate = new Date(row['Value Date']);
-                            valueDate = date.format(valueDate,'YYYY-MM-DD HH:mm:ss');
+                            valueDate = new Date(row['Value Date']).toISOString();
                         }
                         let orderTimestamp = null;
                         if (row['Order Timestamp']) {
-                            orderTimestamp = new Date(row['Order Timestamp']);
-                            orderTimestamp = date.format(orderTimestamp,'YYYY-MM-DD HH:mm:ss');
+                            orderTimestamp = new Date(row['Order Timestamp']).toISOString();
                         }
                         let userId = null;
                         if (row['CAN Number']) {
@@ -206,12 +202,10 @@ export default {
                         let endDate = null;
 
                         if (row['start_date']) {
-                            startDate = new Date(row['start_date']);
-                            startDate = date.format(startDate,'YYYY-MM-DD HH:mm:ss');
+                            startDate = new Date(row['start_date']).toISOString();
                         }
                         if (row['start_date']) {
-                            endDate = new Date(row['End Date']);
-                            endDate = date.format(endDate,'YYYY-MM-DD HH:mm:ss');
+                            endDate = new Date(row['End Date']).toISOString();
                         }
                         bodyData = {
                             userId: userId,
@@ -269,8 +263,7 @@ export default {
                     } else if (subject === canSubject) {
                         let canRegDate = null;
                         if (row['CAN Reg Date']) {
-                            canRegDate = new Date(row['CAN Reg Date']);
-                            canRegDate = date.format(canRegDate,'YYYY-MM-DD HH:mm:ss');
+                            canRegDate = new Date(row['CAN Reg Date']).toISOString();
                         }
                         bodyData = {
                             arnCode: row['ARN/RIA Code'],
@@ -302,24 +295,19 @@ export default {
                         let nfoStart = null;
                         let nfoEnd = null;
                         if (row['allot_date']) {
-                            allotDate = new Date(row['allot_date']);
-                            allotDate = date.format(allotDate,'YYYY-MM-DD HH:mm:ss');
+                            allotDate = new Date(row['allot_date']).toISOString();
                         }
                         if (row['reopen_date']) {
-                            reopenDate = new Date(row['reopen_date']);
-                            reopenDate = date.format(reopenDate,'YYYY-MM-DD HH:mm:ss');
+                            reopenDate = new Date(row['reopen_date']).toISOString();
                         }
                         if (row['maturity_date']) {
-                            maturityDate = new Date(row['maturity_date']);
-                            maturityDate = date.format(maturityDate,'YYYY-MM-DD HH:mm:ss');
+                            maturityDate = new Date(row['maturity_date']).toISOString();
                         }
                         if (row['nfo_start']) {
-                            nfoStart = new Date(row['nfo_start']);
-                            nfoStart = date.format(nfoStart,'YYYY-MM-DD HH:mm:ss');
+                            nfoStart = new Date(row['nfo_start']).toISOString();
                         }
                         if (row['nfo_end']) {
-                            nfoEnd = new Date(row['nfo_end']);
-                            nfoEnd = date.format(nfoEnd,'YYYY-MM-DD HH:mm:ss');
+                            nfoEnd = new Date(row['nfo_end']).toISOString();
                         }
                         bodyData = {
                             schemeCode: row['scheme_code'],
@@ -359,12 +347,10 @@ export default {
                         let startDate = null;
                         let endDate = null;
                         if (row['start_date']) {
-                            startDate = new Date(row['start_date']);
-                            startDate = date.format(startDate,'YYYY-MM-DD HH:mm:ss');
+                            startDate = new Date(row['start_date']).toISOString();
                         }
                         if (row['end_date']) {
-                            endDate = new Date(row['end_date']);
-                            endDate = date.format(endDate,'YYYY-MM-DD HH:mm:ss');
+                            endDate = new Date(row['end_date']).toISOString();
                         }
                         let thresholdInc = await schemeMasterInc.findOne({
                             where: { schemeCode: row['scheme_code'].toString(), fundCode: row['fund_code'].toString() }
@@ -398,8 +384,7 @@ export default {
                     } else if (subject === CDSSubject) {
                         let navDate = null;
                         if (row['NAV Date']) {
-                            navDate = new Date(row['NAV Date']);
-                            navDate = date.format(navDate,'YYYY-MM-DD HH:mm:ss');
+                            navDate = new Date(row['NAV Date']).toISOString();
                         }
                         bodyData = {
                             can: row['CAN'],

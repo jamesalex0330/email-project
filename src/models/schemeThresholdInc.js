@@ -25,10 +25,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING(255),
             },
             minAmt: {
-                type: DataTypes.DECIMAL(17,4),
+                type: DataTypes.DECIMAL(20,4),
             },
             maxAmt: {
-                type: DataTypes.DECIMAL(17,4),
+                type: DataTypes.DECIMAL(20,4),
             },
             multipleAmt: {
                 type: DataTypes.DECIMAL(17,4),

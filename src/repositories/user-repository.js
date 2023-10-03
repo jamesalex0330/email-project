@@ -58,11 +58,11 @@ export default {
       let fundData = await cdsHold.findAll(
         {
           attributes: {
-            exclude: ["canName", "fundCode", "schemeCode", "folioCheckDigit", 'updatedAt']
+            exclude: ["canName", "fundCode", "folioCheckDigit", 'updatedAt']
           },
           where: { 'can': canNumber },
           limit: parseInt(queryData.limit || 10),
-          offset: parseInt(queryData.offset || 0)
+          offset: parseInt(queryData.offset || 0),
         },
       );
       data.userId = userId;
@@ -102,38 +102,19 @@ export default {
       "fundData": [],
     };
     if (data) {
-      let todayDayCurrentAmount = 0.00;
-      let yesterdayDayCurrentAmount = 0.00;
       let cdsDataWhere = {};
       cdsDataWhere.can = canNumber;
-      cdsDataWhere.createdAt = { [Op.gte]: moment().subtract(1, 'days').startOf('day'), [Op.lte]: moment().subtract(1, 'days').endOf('day') };
-      let cdsTodayData = await this.getTodayReturn(cdsDataWhere);
-      if (cdsTodayData) {
-        todayDayCurrentAmount = cdsTodayData?.totalCurrent ?? 0.00;
+      let todayDayCurrentAmount = await this.getTodayReturn(cdsDataWhere, "today");
+      let yesterdayDayCurrentAmount = await this.getTodayReturn(cdsDataWhere, "yesterday");
+      if (todayDayCurrentAmount > 0) {
+        returnData['todaysReturn'] = commonHelper.roundNumber(((parseFloat(todayDayCurrentAmount) - parseFloat(yesterdayDayCurrentAmount)) / parseFloat(yesterdayDayCurrentAmount) * 100), 2);
       }
-      cdsDataWhere.createdAt = { [Op.gte]: moment().subtract(2, 'days').startOf('day'), [Op.lte]: moment().subtract(2, 'days').endOf('day') };
-      let cdsYesterdayData = await this.getTodayReturn(cdsDataWhere);
-      if (cdsYesterdayData) {
-        yesterdayDayCurrentAmount = cdsYesterdayData?.totalCurrent ?? 0.00;
-      }
-      returnData['todaysReturn'] = commonHelper.roundNumber(((parseFloat(todayDayCurrentAmount) - parseFloat(yesterdayDayCurrentAmount)) / parseFloat(yesterdayDayCurrentAmount) * 100), 2);
-      for await (const row of data) {
 
-        let todayDayCurrentAmount = 0.00;
-        let yesterdayDayCurrentAmount = 0.00;
-        let cdsDataWhere = {};
-        cdsDataWhere.can = canNumber;
+      for await (const row of data) {
         cdsDataWhere.folioNumber = row?.folioNumber;
-        cdsDataWhere.createdAt = { [Op.gte]: moment().subtract(1, 'days').startOf('day'), [Op.lte]: moment().subtract(1, 'days').endOf('day') };
-        let cdsTodayData = await this.getTodayReturn(cdsDataWhere);
-        if (cdsTodayData) {
-          todayDayCurrentAmount = cdsTodayData?.totalCurrent ?? 0.00;
-        }
-        cdsDataWhere.createdAt = { [Op.gte]: moment().subtract(2, 'days').startOf('day'), [Op.lte]: moment().subtract(2, 'days').endOf('day') };
-        let cdsYesterdayData = await this.getTodayReturn(cdsDataWhere);
-        if (cdsYesterdayData) {
-          yesterdayDayCurrentAmount = cdsYesterdayData?.totalCurrent ?? 0.00;
-        }
+        let todayDayCurrentAmount = await this.getTodayReturn(cdsDataWhere, "today");
+        let yesterdayDayCurrentAmount = await this.getTodayReturn(cdsDataWhere, "yesterday");
+
         let txnResponseData = {
           "canNumber": row.can,
           "folio_number": null,
@@ -152,6 +133,13 @@ export default {
         if (leadData[0]) {
           invested = leadData[0]?.sum_amount;
         }
+        let navValue = 0.00;
+        if (row?.schemeCode) {
+          let schemeData = await commonHelper.getSchemeData(row?.schemeCode);
+          if (schemeData.length > 0) {
+            navValue = schemeData[0]?.nav ?? navValue;
+          }
+        }
         let arrayData = {
           "id": row?.id,
           "folioNumber": row?.folioNumber,
@@ -161,10 +149,10 @@ export default {
           "current": commonHelper.roundNumber(current, 2),
           "absReturns": commonHelper.roundNumber((parseFloat(current) - parseFloat(invested) / parseFloat(invested)), 2),
           "totalReturns": commonHelper.roundNumber((parseFloat(current) - parseFloat(invested)), 2),
-          "todaysReturn": commonHelper.roundNumber(((parseFloat(todayDayCurrentAmount) - parseFloat(yesterdayDayCurrentAmount)) / parseFloat(yesterdayDayCurrentAmount) * 100), 2),
-          "units": leadData?.units ?? 0.00,              //  txn_response_transaction_rsps
+          "todaysReturn": (todayDayCurrentAmount > 0) ? commonHelper.roundNumber(((parseFloat(todayDayCurrentAmount) - parseFloat(yesterdayDayCurrentAmount)) / parseFloat(yesterdayDayCurrentAmount) * 100), 2) : 0.00,
+          "units": leadData?.units ?? 0.00,
           "sinceDate": row?.navDate ?? "",
-          "currentNAV": commonHelper.roundNumber((row?.nav ?? 0.00), 2),
+          "currentNAV": commonHelper.roundNumber(navValue, 2),
           "createdAt": row.createdAt,
         };
         returnData['invested'] = parseFloat(returnData['invested']) + parseFloat(invested);
@@ -177,8 +165,13 @@ export default {
     }
     return returnData;
   },
-  async getTodayReturn(where) {
-    return await cdsHold.findOne(
+  async getTodayReturn(cdsDataWhere, type = "today") {
+    let returnTotalCurrent = 0.00;
+    cdsDataWhere.createdAt = { [Op.gte]: moment().subtract(2, 'days').startOf('day'), [Op.lte]: moment().subtract(2, 'days').endOf('day') }
+    if (type == "today") {
+      cdsDataWhere.createdAt = { [Op.gte]: moment().subtract(1, 'days').startOf('day'), [Op.lte]: moment().subtract(1, 'days').endOf('day') };
+    }
+    let result = await cdsHold.findOne(
       {
         attributes: {
           exclude: ["id", "canName", "fundCode", "schemeCode", "schemeName", "folioNumber", "folioCheckDigit", "navDate", 'createdAt', 'updatedAt', "can", "fundName", "unitHolding"],
@@ -186,12 +179,14 @@ export default {
             [Sequelize.fn('ROUND', Sequelize.fn('SUM', Sequelize.col('current_value')), 2), 'totalCurrent']
           ]
         },
-        where: where,
-        raw: true,
+        where: cdsDataWhere,
+        raw: true
       }
     );
+
+    if (result) {
+      returnTotalCurrent = result?.totalCurrent ?? 0.00;
+    }
+    return returnTotalCurrent;
   }
-
-
-
 }

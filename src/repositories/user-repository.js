@@ -32,11 +32,9 @@ export default {
             exclude: ["canName", "fundCode", "folioCheckDigit", 'updatedAt']
           },
           where: { 'can': canNumber },
-          limit: parseInt(queryData.limit || 10),
-          offset: parseInt(queryData.offset || 0),
         },
       );
-      return await this.dashboardMaiArray(fundData, canNumber);
+      return await this.dashboardMainArray(fundData, canNumber);
     } catch (error) {
       throw Error(error);
     }
@@ -59,7 +57,7 @@ export default {
     }
   },
 
-  async dashboardMaiArray(data, canNumber) {
+  async dashboardMainArray(data, canNumber) {
     let returnData = {
       "invested": 0.00,
       "current": 0.00,
@@ -76,8 +74,12 @@ export default {
       if (todayDayCurrentAmount > 0) {
         returnData['todaysReturn'] = commonHelper.roundNumber(((parseFloat(todayDayCurrentAmount) - parseFloat(yesterdayDayCurrentAmount)) / parseFloat(yesterdayDayCurrentAmount) * 100), 2);
       }
-
-      for await (const row of data) {
+      let folioNumber = [];
+      for await (const row of data) {        
+        if(folioNumber.includes(row?.folioNumber)) {
+          continue;
+        }
+        folioNumber.push(row?.folioNumber);
         cdsDataWhere.folioNumber = row?.folioNumber;
         let todayDayCurrentAmount = await this.getTodayReturn(cdsDataWhere, "today");
         let yesterdayDayCurrentAmount = await this.getTodayReturn(cdsDataWhere, "yesterday");
@@ -92,7 +94,7 @@ export default {
           "transaction_type_code": ["'A'", "'B'", "'N'", "'V'"],
         }
         let subQuery = helpers.dashboardQuery(txnResponseData);
-        const leadData = await models.sequelize.query(subQuery, {
+        let leadData = await models.sequelize.query(subQuery, {
           type: models.sequelize.QueryTypes.SELECT,
           logging:console.log
         });
@@ -122,6 +124,7 @@ export default {
           "sinceDate": row?.navDate ?? "",
           "currentNAV": commonHelper.roundNumber(navValue, 2),
           "createdAt": row.createdAt,
+          "can": row.can,
         };
         returnData['invested'] = parseFloat(returnData['invested']) + parseFloat(invested);
         returnData['current'] = commonHelper.roundNumber((parseFloat(returnData['current']) + parseFloat(current)), 2);

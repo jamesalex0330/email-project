@@ -13,7 +13,6 @@ export default {
 
   async dashboard(req, t) {
     try {
-      let data = {};
       const { query } = req;
       const queryData = query;
       let userId = req.user.id;
@@ -26,34 +25,6 @@ export default {
         where: { firstHolderPan: userData.panCard }
       });
 
-      let investedData = {};
-
-      let txnResponseData = {
-        "canNumber": userCanData.can,
-        "folio_number": null,
-        "utrn": 0,
-        "payment_status": ["'CR'", "'IR'", "'DG'", "'DA'", "'PC'", "'PD'"],
-        "transaction_status": ["'CR'", "'IR'", "'DG'", "'DA'", "'PC'", "'PD'"],
-        "transaction_status": ["'OA'", "'RA'", "'RP'"],
-        "transaction_type_code": ["'A'", "'B'", "'N'", "'V'"],
-      }
-      let subQuery = helpers.dashboardQuery(txnResponseData);
-      const leadData = await models.sequelize.query(subQuery, {
-        type: models.sequelize.QueryTypes.SELECT,
-      });
-      const csdData = await cdsHold.findOne(
-        {
-          attributes: {
-            include: [
-              [Sequelize.fn('ROUND', Sequelize.fn('SUM', Sequelize.col('current_value')), 2), 'currentValue']
-            ]
-          },
-          group: ["id"],
-          raw: true
-        }
-      );
-      investedData.invested = leadData?.sum_amount;
-      investedData.current = csdData.currentValue;
       let canNumber = userCanData.can;
       let fundData = await cdsHold.findAll(
         {
@@ -65,10 +36,6 @@ export default {
           offset: parseInt(queryData.offset || 0),
         },
       );
-      data.userId = userId;
-      data.name = req.user.firstName + ' ' + req.user.lastName;
-      data.investedData = investedData;
-      data.investedData.fundData = fundData;
       return await this.dashboardMaiArray(fundData, canNumber);
     } catch (error) {
       throw Error(error);
@@ -118,7 +85,7 @@ export default {
         let txnResponseData = {
           "canNumber": row.can,
           "folio_number": null,
-          "utrn": 0,
+          "utrn": "'0'",
           "payment_status": ["'CR'", "'IR'", "'DG'", "'DA'", "'PC'", "'PD'"],
           "transaction_status": ["'CR'", "'IR'", "'DG'", "'DA'", "'PC'", "'PD'"],
           "transaction_status": ["'OA'", "'RA'", "'RP'"],
@@ -127,6 +94,7 @@ export default {
         let subQuery = helpers.dashboardQuery(txnResponseData);
         const leadData = await models.sequelize.query(subQuery, {
           type: models.sequelize.QueryTypes.SELECT,
+          logging:console.log
         });
         let invested = 0.00;
         let current = row?.currentValue ?? 0.00;
@@ -180,7 +148,8 @@ export default {
           ]
         },
         where: cdsDataWhere,
-        raw: true
+        raw: true,
+        group: ['id']
       }
     );
 

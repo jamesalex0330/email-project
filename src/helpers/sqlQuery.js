@@ -1,5 +1,4 @@
 export default {
-
   dashboardQuery(data) {
     let paymentStatus = data['payment_status'] ?? []
     let transactionStatus = data['transaction_status'] ?? []
@@ -8,18 +7,24 @@ export default {
     let folioNumber = data['folio_number'] ?? null;
     let utrn = data['utrn'] ?? 0;
 
-    return `SELECT txnResponseTransactionRsp.id, txnResponseTransactionRsp.units, (ROUND(SUM(txnResponseTransactionRsp.amount), 2) + ROUND(SUM(txnResponseSystematicRsps.price), 2)) AS sum_amount
+    return `SELECT txnResTrans.id, txnResTrans.units, 
+              (IFNULL(ROUND(SUM(txnResTrans.amount), 2), 0) + (
+                  (
+                    (SELECT IFNULL(ROUND(SUM(response_amount), 2), 0) FROM txn_response_systematic_rsps WHERE folio_number = txnResTrans.folio_number AND transaction_type_code = 'V') -
+                    (SELECT IFNULL(ROUND(SUM(response_amount), 2), 0) FROM txn_response_systematic_rsps WHERE folio_number = txnResTrans.folio_number AND transaction_type_code = 'R')
+                  )
+                )
+              ) AS sum_amount
             FROM
-                txn_response_transaction_rsps AS txnResponseTransactionRsp
-            RIGHT JOIN txn_response_systematic_rsps as txnResponseSystematicRsps ON txnResponseSystematicRsps.folio_number = txnResponseTransactionRsp.folio_number
+                txn_response_transaction_rsps AS txnResTrans
             WHERE
-                txnResponseTransactionRsp.folio_number IS NOT ${folioNumber}
-                AND txnResponseTransactionRsp.utrn NOT IN (${utrn})
-                AND txnResponseTransactionRsp.payment_status IN (${paymentStatus})
-                AND txnResponseTransactionRsp.transaction_status IN (${transactionStatus})
-                AND txnResponseTransactionRsp.transaction_type_code IN (${transactionTypeCode})
-                AND txnResponseTransactionRsp.can_number = '${canNumber}'
-            GROUP BY txnResponseTransactionRsp.id LIMIT 1;`;
+                txnResTrans.folio_number IS NOT ${folioNumber}
+                AND txnResTrans.utrn NOT IN (${utrn})
+                AND txnResTrans.payment_status IN (${paymentStatus})
+                AND txnResTrans.transaction_status IN (${transactionStatus})
+                AND txnResTrans.transaction_type_code IN (${transactionTypeCode})
+                AND txnResTrans.can_number = '${canNumber}'
+            GROUP BY txnResTrans.id LIMIT 1;`;
   },
 
 };

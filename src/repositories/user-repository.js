@@ -7,34 +7,33 @@ import httpStatus from "http-status";
 import helpers from "../helpers/sqlQuery";
 import commonHelper from "../helpers/commonHelper";
 const { Sequelize } = models.sequelize;
-const { user, cdsHold, txnResponseTransactionRsp, userCanRegistration } = models
+const { user, userCanRegistration, cdsHold, txnResponseTransactionRsp, txnResponseSystematicRsp } = models
 import moment from "moment-timezone";
+import utility from "../services/utility";
 export default {
 
   async dashboard(req, t) {
     try {
-      const { query } = req;
-      const queryData = query;
       let userId = req.user.id;
 
       let userData = await user.findOne({
         where: { id: userId }
       });
-
-      let userCanData = await userCanRegistration.findOne({
-        where: { firstHolderPan: userData.panCard }
-      });
-
-      let canNumber = userCanData.can;
-      let fundData = await cdsHold.findAll(
-        {
-          attributes: {
-            exclude: ["canName", "fundCode", "folioCheckDigit", 'updatedAt']
+      if (userData) {
+        let fundData = await txnResponseTransactionRsp.findAll(
+          {
+            attributes: {
+              exclude: ['updatedAt']
+            },
+            where: {
+              'userId': userData.id,
+              valueDate: { [Op.gte]: moment().subtract(1, 'days').startOf('day'), [Op.lte]: moment().subtract(1, 'days').endOf('day') }
+            },
           },
-          where: { 'can': canNumber },
-        },
-      );
-      return await this.dashboardMainArray(fundData, canNumber);
+        );
+        return await this.dashboardMainArray(fundData);
+
+      }
     } catch (error) {
       throw Error(error);
     }
@@ -64,90 +63,79 @@ export default {
       "absReturns": 0.00,
       "totalReturns": 0.00,
       "todaysReturn": 0.00,
+      "xirr": 0.00,
       "fundData": [],
     };
     if (data) {
-      let cdsDataWhere = {};
-      cdsDataWhere.can = canNumber;
-      let todayDayCurrentAmount = await this.getTodayReturn(cdsDataWhere, "today");
-      let yesterdayDayCurrentAmount = await this.getTodayReturn(cdsDataWhere, "yesterday");
-      if (todayDayCurrentAmount > 0) {
-        returnData['todaysReturn'] = commonHelper.roundNumber(((parseFloat(todayDayCurrentAmount) - parseFloat(yesterdayDayCurrentAmount)) / parseFloat(yesterdayDayCurrentAmount) * 100), 2);
-      }
-      let folioNumber = [];
-      for await (const row of data) {        
-        if(folioNumber.includes(row?.folioNumber)) {
-          continue;
+      for await (const row of data) {
+        let navValue = 0.00;
+        if (row?.rtaSchemeCode) {
+          let schemeData = await commonHelper.getSchemeData(row?.rtaSchemeCode);
+          if (schemeData.length > 0) {
+            navValue = schemeData[0]?.nav ?? navValue;
+          }
         }
-        folioNumber.push(row?.folioNumber);
-        cdsDataWhere.folioNumber = row?.folioNumber;
+
+        let cdsDataWhere = {};
+        cdsDataWhere.canNumber = row.canNumber;
+        cdsDataWhere.FolioNumber = row?.FolioNumber;
         let todayDayCurrentAmount = await this.getTodayReturn(cdsDataWhere, "today");
         let yesterdayDayCurrentAmount = await this.getTodayReturn(cdsDataWhere, "yesterday");
-
         let txnResponseData = {
-          "canNumber": row.can,
+          "canNumber": row.canNumber,
           "folio_number": null,
           "utrn": "'0'",
           "payment_status": ["'CR'", "'IR'", "'DG'", "'DA'", "'PC'", "'PD'"],
-          "transaction_status": ["'CR'", "'IR'", "'DG'", "'DA'", "'PC'", "'PD'"],
           "transaction_status": ["'OA'", "'RA'", "'RP'"],
           "transaction_type_code": ["'A'", "'B'", "'N'", "'V'"],
         }
         let subQuery = helpers.dashboardQuery(txnResponseData);
         let leadData = await models.sequelize.query(subQuery, {
           type: models.sequelize.QueryTypes.SELECT,
-          logging:console.log
+          // logging: console.log
         });
         let invested = 0.00;
-        let current = row?.currentValue ?? 0.00;
+        let current = row?.responseAmount ?? 0.00;
         if (leadData[0]) {
-          invested = leadData[0]?.sum_amount;
-        }
-        let navValue = 0.00;
-        if (row?.schemeCode) {
-          let schemeData = await commonHelper.getSchemeData(row?.schemeCode);
-          if (schemeData.length > 0) {
-            navValue = schemeData[0]?.nav ?? navValue;
-          }
+          invested = commonHelper.roundNumber((parseFloat(leadData[0]?.sum_amount) * parseFloat(navValue)));
         }
         let arrayData = {
           "id": row?.id,
           "folioNumber": row?.folioNumber,
           "fundName": row?.fundName,
-          "schemeName": row?.schemeName,
-          "invested": commonHelper.roundNumber(invested),
-          "current": commonHelper.roundNumber(current, 2),
-          "absReturns": commonHelper.roundNumber((parseFloat(current) - parseFloat(invested) / parseFloat(invested)), 2),
-          "totalReturns": commonHelper.roundNumber((parseFloat(current) - parseFloat(invested)), 2),
-          "todaysReturn": (todayDayCurrentAmount > 0) ? commonHelper.roundNumber(((parseFloat(todayDayCurrentAmount) - parseFloat(yesterdayDayCurrentAmount)) / parseFloat(yesterdayDayCurrentAmount) * 100), 2) : 0.00,
+          "schemeName": row?.rtaSchemeName,
+          "invested": invested,
+          "current": commonHelper.roundNumber(current),
+          "absReturns": (current > 0 && invested > 0) ? commonHelper.roundNumber((parseFloat(current) - parseFloat(invested) / parseFloat(invested))) : 0.00,
+          "totalReturns": commonHelper.roundNumber((parseFloat(current) - parseFloat(invested))),
+          "todaysReturn": (todayDayCurrentAmount > 0 && yesterdayDayCurrentAmount > 0) ? commonHelper.roundNumber((parseFloat(todayDayCurrentAmount) - parseFloat(yesterdayDayCurrentAmount)) / parseFloat(yesterdayDayCurrentAmount) * 100) : 0.00,
           "units": leadData?.units ?? 0.00,
-          "sinceDate": row?.navDate ?? "",
-          "currentNAV": commonHelper.roundNumber(navValue, 2),
-          "createdAt": row.createdAt,
-          "can": row.can,
+          "sinceDate": utility.changeDateFormat(row?.startDate) ?? "",
+          "currentNAV": commonHelper.roundNumber(navValue),
+          "createdAt": utility.changeDateFormat(row.createdAt, "YYYY-MM-DD HH:mm:ss"),
+          "canNumber": row.canNumber,
         };
-        returnData['invested'] = parseFloat(returnData['invested']) + parseFloat(invested);
-        returnData['current'] = commonHelper.roundNumber((parseFloat(returnData['current']) + parseFloat(current)), 2);
+        returnData['invested'] = commonHelper.roundNumber(parseFloat(returnData['invested']) + parseFloat(invested));
+        returnData['current'] = commonHelper.roundNumber((parseFloat(returnData['current']) + parseFloat(current)));
         returnData['absReturns'] = commonHelper.roundNumber(parseFloat(returnData['absReturns']) + parseFloat(arrayData.absReturns));
         returnData['totalReturns'] = commonHelper.roundNumber(parseFloat(returnData['totalReturns']) + parseFloat(arrayData.totalReturns));
+        returnData['todaysReturn'] = commonHelper.roundNumber(parseFloat(returnData['todaysReturn']) + parseFloat(arrayData.todaysReturn));
         returnData['fundData'].push(arrayData);
-
       }
     }
     return returnData;
   },
   async getTodayReturn(cdsDataWhere, type = "today") {
     let returnTotalCurrent = 0.00;
-    cdsDataWhere.createdAt = { [Op.gte]: moment().subtract(2, 'days').startOf('day'), [Op.lte]: moment().subtract(2, 'days').endOf('day') }
+    cdsDataWhere.valueDate = { [Op.gte]: moment().subtract(2, 'days').startOf('day'), [Op.lte]: moment().subtract(2, 'days').endOf('day') }
     if (type == "today") {
-      cdsDataWhere.createdAt = { [Op.gte]: moment().subtract(1, 'days').startOf('day'), [Op.lte]: moment().subtract(1, 'days').endOf('day') };
+      cdsDataWhere.valueDate = { [Op.gte]: moment().subtract(1, 'days').startOf('day'), [Op.lte]: moment().subtract(1, 'days').endOf('day') };
     }
-    let result = await cdsHold.findOne(
+    let result = await txnResponseTransactionRsp.findOne(
       {
         attributes: {
-          exclude: ["id", "canName", "fundCode", "schemeCode", "schemeName", "folioNumber", "folioCheckDigit", "navDate", 'createdAt', 'updatedAt', "can", "fundName", "unitHolding"],
           include: [
-            [Sequelize.fn('ROUND', Sequelize.fn('SUM', Sequelize.col('current_value')), 2), 'totalCurrent']
+            [Sequelize.fn('ROUND', Sequelize.fn('SUM', Sequelize.col('response_units')), 2), 'totalCurrent']
           ]
         },
         where: cdsDataWhere,

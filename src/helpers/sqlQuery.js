@@ -8,10 +8,10 @@ export default {
     let utrn = data['utrn'] ?? 0;
 
     return `SELECT txnResTrans.id, txnResTrans.units, 
-              (IFNULL(ROUND(SUM(txnResTrans.amount), 2), 0) + (
+              (coalesce(ROUND(SUM(txnResTrans.amount), 2), 0) + (
                   (
-                    (SELECT IFNULL(ROUND(SUM(response_amount), 2), 0) FROM txn_response_systematic_rsps WHERE folio_number = txnResTrans.folio_number AND transaction_type_code = 'V') -
-                    (SELECT IFNULL(ROUND(SUM(response_amount), 2), 0) FROM txn_response_systematic_rsps WHERE folio_number = txnResTrans.folio_number AND transaction_type_code = 'R')
+                    (SELECT coalesce(ROUND(SUM(response_amount), 2), 0) FROM txn_response_systematic_rsps WHERE folio_number = txnResTrans.folio_number AND transaction_type_code = 'V') -
+                    (SELECT coalesce(ROUND(SUM(response_amount), 2), 0) FROM txn_response_systematic_rsps WHERE folio_number = txnResTrans.folio_number AND transaction_type_code = 'R')
                   )
                 )
               ) AS sum_amount

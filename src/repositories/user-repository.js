@@ -56,7 +56,7 @@ export default {
     }
   },
 
-  async dashboardMainArray(data, canNumber) {
+  async dashboardMainArray(data) {
     let returnData = {
       "invested": 0.00,
       "current": 0.00,
@@ -92,7 +92,6 @@ export default {
         let subQuery = helpers.dashboardQuery(txnResponseData);
         let leadData = await models.sequelize.query(subQuery, {
           type: models.sequelize.QueryTypes.SELECT,
-          // logging: console.log
         });
         let invested = 0.00;
         let current = row?.responseAmount ?? 0.00;
@@ -133,17 +132,14 @@ export default {
     }
     let result = await txnResponseTransactionRsp.findOne(
       {
-        attributes: {
-          include: [
-            [Sequelize.fn('ROUND', Sequelize.fn('SUM', Sequelize.col('response_units')), 2), 'totalCurrent']
-          ]
-        },
+        attributes: [
+          [Sequelize.fn('ROUND', Sequelize.fn('SUM', Sequelize.col('response_units')), 2), 'totalCurrent']
+        ],
         where: cdsDataWhere,
         raw: true,
         group: ['id']
       }
     );
-
     if (result) {
       returnTotalCurrent = result?.totalCurrent ?? 0.00;
     }

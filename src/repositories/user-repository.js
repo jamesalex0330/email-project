@@ -144,5 +144,18 @@ export default {
       returnTotalCurrent = result?.totalCurrent ?? 0.00;
     }
     return returnTotalCurrent;
+  },
+
+  async removeUser(req) {
+    try {
+      let userId = req.params.userId ? req.params.userId : '';
+      let isUserExist = this.findOne({ id: userId });
+      if(isUserExist == null || isUserExist == "") {
+        throw("Something went wrong");
+      }
+      return await user.destroy({where : {id : userId}})
+    } catch (error) {
+      throw Error(error);
+    }
   }
 }

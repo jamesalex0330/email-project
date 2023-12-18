@@ -34,5 +34,32 @@ export default {
       console.log(error);
       next(error);
     }
+  },
+
+  /**
+   * Delete User
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Function} next
+   */
+  async removeUser(req, res, next) {
+    try {
+      let result = await userRepository.removeUser(req);
+      if (result) {
+        res.status(HttpStatus.OK).json({
+          success: true,
+          data: result,
+          message:"User deleted successfully"
+        });
+      } else {
+        res.status(HttpStatus.BAD_REQUEST).json({
+          success: false,
+          data: null,
+        });
+      }
+    } catch (error) {
+      next(error);
+    }
   }
+
 }

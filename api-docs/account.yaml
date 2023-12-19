@@ -35,6 +35,20 @@ paths:
         responses:
           '200':
             description: OK
+  /logout:
+    get:
+      tags:
+      - account
+      summary: logout
+      security:
+      - BearerAuth: []
+      produces:
+      - application/json
+      parameters: []
+      responses:
+        "200":
+          description: OK
+
 definitions:
   signup:
     type: object

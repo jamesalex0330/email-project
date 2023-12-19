@@ -16,4 +16,9 @@ validateMiddleware({ schema: accountValidator.userAccountLoginSchema }),
     accountController.userAccountLogin
 )
 
+router.get("/logout",
+    authMiddleware,
+    accountController.logout
+)
+
 export default router;

@@ -186,4 +186,21 @@ export default {
       throw Error(error);
     }
   },
+
+    /**
+  * logout user by token
+  * @param {String} token
+  */
+    async logout(req) {
+      try {
+        let userId = req.user.id;
+        let isLogout = await userToken.destroy({ where: { userId: userId } });
+        if (isLogout) {
+          return true;
+        }
+        throw ("Something went wrong");
+      } catch (error) {
+        throw Error(error);
+      }
+    }
 }

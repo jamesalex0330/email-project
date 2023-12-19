@@ -84,6 +84,32 @@ export default {
     }
   },
 
+    /**
+   * Logout User
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Function} next
+   */
+    async logout(req, res, next) {
+      try {
+        let result = await accountRepository.logout(req);
+        if (result) {
+          res.status(HttpStatus.OK).json({
+            success: true,
+            data: null,
+            message: "User logout successfully"
+          });
+        } else {
+          res.status(HttpStatus.BAD_REQUEST).json({
+            success: false,
+            data: null,
+          });
+        }
+      } catch (error) {
+        next(error);
+      }
+    }
+
 
 
 }

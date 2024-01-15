@@ -203,4 +203,72 @@ export default {
         throw Error(error);
       }
     }
+
+    async changePassword(req) {
+      try {
+        var userDetail = req.user
+        let userId = userDetail.id;
+        let hashPassword = await this.createHashPassword(req.body.password);
+        let userData = {
+          'password': hashPassword ? hashPassword : ''
+        }
+        let result = await user.update(userData, { where: { id: userId } });
+        if (result) {
+          return true;
+        } else {
+          throw ("Something went wrong");
+        }
+      } catch (error) {
+        throw Error(error);
+      }
+    },
+    async sendOtp(req) {
+      let userData = await this.findOne({ email: req.body.email });
+      if (user != null && user != "") {
+        let otp = utility.generateOtp();
+        await userData.update({
+          otp: otp,
+          // otpSentTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+        });
+        let subject = 'Forgot Password';
+        const data = {
+          to: userData.email,
+          email: userData.email,
+          name: userData.firstName + ' ' + userData.lastName,
+          otp: otp,
+          subject: subject,
+        };
+        await Mail.forgotPassword(data)
+          .then((result) => {
+            console.log(result, "success");
+            return true;
+          })
+          .catch((error) => {
+            console.log(error, "error");
+            throw ("Something went wrong");
+          });
+        return userData;
+      }
+    },
+  
+    async verifyOtp(req) {
+      let userData = await this.findOne({ email: req.body.email });
+      if (userData != null && userData != "") {
+        if (userData.otp != req.body.otp) {
+          throw "OTP mismatch";
+        }
+        let hashPassword = await this.createHashPassword(req.body.password);
+        if (userData) {
+          await userData.update({
+            otp: null,
+            password: hashPassword
+          });
+          return userData;
+        } else {
+          throw ("Something went wrong");
+        }
+      } else {
+        throw ("User not found");
+      }
+    }
 }

@@ -22,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       panCard: {
         type: DataTypes.STRING(50),
+      },
+      otp: {
+        type: DataTypes.STRING(255),
+        allowNull: true
       }
     }, {
       underscored: true,

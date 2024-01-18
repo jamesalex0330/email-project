@@ -202,7 +202,7 @@ export default {
       } catch (error) {
         throw Error(error);
       }
-    }
+    },
 
     async changePassword(req) {
       try {

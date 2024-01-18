@@ -12,10 +12,10 @@ const {
 router.get("/dashboard",
   authMiddleware,
   userController.dashboard
-),
+);
 
 router.delete("/remove-user/:userId",
   authMiddleware,
   userController.removeUser
-)
+);
 export default router;

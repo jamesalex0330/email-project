@@ -12,7 +12,7 @@ router.post("/signup",
     accountController.signup
 );
 router.post("/login",
-validateMiddleware({ schema: accountValidator.userAccountLoginSchema }),
+    validateMiddleware({ schema: accountValidator.userAccountLoginSchema }),
     accountController.userAccountLogin
 );
 router.post("/forgot-password",

@@ -35,7 +35,7 @@ paths:
         responses:
           '200':
             description: OK
-            /forgot-password:
+  /forgot-password:
     post:
         tags:
           - account
@@ -102,7 +102,6 @@ paths:
       responses:
         "200":
           description: OK
-
 definitions:
   signup:
     type: object
@@ -145,3 +144,24 @@ definitions:
         enum: 
           - 'android'
           - 'ios'  
+  forgot-password:
+    type: object
+    properties:
+      email: 
+        type: string
+        required: true
+  verify-otp:
+    type: object
+    properties:
+      email: 
+        type: string
+        required: true
+      otp:
+        type: string
+        required: true
+      password:
+        type: string
+        required: true
+      confirmPassword:
+        type: string
+        required: true

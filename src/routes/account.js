@@ -5,7 +5,7 @@ import middlewares from "../middlewares";
 const router = Router();
 const { accountController } = controllers;
 const { accountValidator } = validations;
-const { validateMiddleware } = middlewares
+const { validateMiddleware, authMiddleware } = middlewares
 
 router.post("/signup",
     validateMiddleware({ schema: accountValidator.userAccountSignupSchema }),

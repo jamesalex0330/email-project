@@ -11,14 +11,27 @@ const userAccountSignupSchema = Joi.object({
     .required()
     .valid(Joi.ref("password")),
   userRole: Joi.string().valid("user", "admin").required(),
-  panCard: Joi.string().required().regex(/([A-Z]){5}([0-9]){4}([A-Z]){1}$/).max(10).label("Pan Card").error(()=>'Pan card is invalid.'),
+  panCard: Joi.string().required().regex(/([A-Z]){5}([0-9]){4}([A-Z]){1}$/).max(10).label("Pan Card").error(() => 'Pan card is invalid.'),
 });
 const userAccountLoginSchema = Joi.object({
   email: Joi.string().label("Email").required(),
   password: Joi.string().required(),
   deviceType: Joi.string().required()
 });
+
+const sendOtpSchema = Joi.object({
+  email: Joi.string().required()
+});
+const verifyOtpSchema = Joi.object({
+  email: Joi.string().required(),
+  otp: Joi.string().length(4).required(),
+  password: Joi.string().required(),
+  confirmPassword: Joi.string().required().valid(Joi.ref("password")).label("Confirm password").error(() => 'password and Confirm password not same.'),
+});
 export default {
   userAccountSignupSchema,
-  userAccountLoginSchema
+  userAccountLoginSchema,
+  changePasswordSchema,
+  sendOtpSchema,
+  verifyOtpSchema
 }

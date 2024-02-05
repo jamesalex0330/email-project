@@ -36,7 +36,7 @@ const authValidateRequest = async (req, res, next) => {
             } else {
               const error = new Error();
               error.status = HttpStatus.UNAUTHORIZED;
-              error.message = 'Your Account is inactive, please contact to admin.';
+              error.message = 'Account does not exist with these credentials.';
               next(error);
             }
 

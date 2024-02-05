@@ -148,12 +148,17 @@ export default {
 
   async removeUser(req) {
     try {
-      let userId = req.params.userId ? req.params.userId : '';
+      let userId = req.user.id;
       let isUserExist = this.findOne({ id: userId });
-      if(isUserExist == null || isUserExist == "") {
-        throw("Something went wrong");
+      if (isUserExist == null || isUserExist == "") {
+        throw ("Something went wrong");
       }
-      return await user.destroy({where : {id : userId}})
+      let isDeleted = await user.destroy({ where: { id: userId } });
+      if (!isDeleted) {
+        throw ("Account not deleted.");
+      }
+      await user.destroy({ where: { id: userId } });
+      return true;
     } catch (error) {
       throw Error(error);
     }

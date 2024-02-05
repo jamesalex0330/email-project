@@ -14,8 +14,8 @@ router.get("/dashboard",
   userController.dashboard
 );
 
-router.delete("/remove-user/:userId",
+router.get("/remove-user",
   authMiddleware,
   userController.removeUser
-);
+)
 export default router;

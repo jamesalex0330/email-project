@@ -20,22 +20,16 @@ paths:
         responses:
           '200':
             description: OK
-  /remove-user/{userId}:
-    delete:
+/remove-user:
+    get:
       tags:
       - user
-      summary: delete user
+      summary: remove user account
       security:
       - BearerAuth: []
       produces:
       - application/json
-      parameters:
-      - in: path
-        name: userId
-        type: integer
-        required: true
-        schema:
-        description: Numeric id to get json object
+      parameters: []
       responses:
         "200":
           description: OK

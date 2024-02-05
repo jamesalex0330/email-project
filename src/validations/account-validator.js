@@ -28,6 +28,11 @@ const verifyOtpSchema = Joi.object({
   password: Joi.string().required(),
   confirmPassword: Joi.string().required().valid(Joi.ref("password")).label("Confirm password").error(() => 'password and Confirm password not same.'),
 });
+const changePasswordSchema = Joi.object({
+  currentPassword: Joi.string().required(),
+  password: Joi.string().required(),
+  confirmPassword: Joi.string().required().valid(Joi.ref("password")).label("Confirm password").error(()=>'password and Confirm password not same.')
+});
 export default {
   userAccountSignupSchema,
   userAccountLoginSchema,

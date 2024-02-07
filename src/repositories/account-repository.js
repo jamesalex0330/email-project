@@ -5,6 +5,7 @@ import config from "../config";
 import jwt from "../services/jwt";
 import httpStatus from "http-status";
 const { Sequelize } = models.sequelize;
+import Mail from "../services/sendMail";
 import utility from '../services/utility';
 const { user, userToken } = models
 export default {
